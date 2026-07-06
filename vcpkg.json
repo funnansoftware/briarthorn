@@ -1,0 +1,14 @@
+{
+    "name": "briarthorn",
+    "version-string": "2026.7.6",
+    "port-version": 1,
+    "description": "CMake presets for various platforms and configurations.",
+    "homepage": "https://github.com/funnansoftware/briarthorn",
+    "dependencies": [
+        "raylib",
+        {
+            "name": "glfw3",
+            "platform": "!emscripten & !android"
+        }
+    ]
+}

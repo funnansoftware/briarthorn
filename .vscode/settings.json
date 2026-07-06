@@ -1,0 +1,8 @@
+{
+    "editor.formatOnSave": true,
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+    "clangd.arguments": [
+        "--compile-commands-dir=${command:cmake.buildDirectory}"
+    ],
+}
