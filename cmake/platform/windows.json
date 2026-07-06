@@ -2,6 +2,7 @@
     "version": 7,
     "include": [
         "../compiler/msvc.json",
+        "../compiler/zig.json",
         "../config/binaryDir.json",
         "../config/debug.json",
         "../config/ninja.json",
@@ -34,6 +35,30 @@
                 "host-x64-windows",
                 "target-x64-windows"
             ]
+        },
+        {
+            "name": "x64-windows-zig-debug",
+            "inherits": [
+                "compiler-zig",
+                "config-binaryDir",
+                "config-debug",
+                "config-ninja",
+                "config-vcpkg",
+                "host-x64-windows",
+                "target-x64-windows"
+            ]
+        },
+        {
+            "name": "x64-windows-zig-release",
+            "inherits": [
+                "compiler-zig",
+                "config-binaryDir",
+                "config-ninja",
+                "config-release",
+                "config-vcpkg",
+                "host-x64-windows",
+                "target-x64-windows"
+            ]
         }
     ],
     "buildPresets": [
@@ -44,6 +69,14 @@
         {
             "name": "x64-windows-msvc-release",
             "configurePreset": "x64-windows-msvc-release"
+        },
+        {
+            "name": "x64-windows-zig-debug",
+            "configurePreset": "x64-windows-zig-debug"
+        },
+        {
+            "name": "x64-windows-zig-release",
+            "configurePreset": "x64-windows-zig-release"
         }
     ],
     "testPresets": [
@@ -57,6 +90,20 @@
         {
             "name": "x64-windows-msvc-release",
             "configurePreset": "x64-windows-msvc-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-windows-zig-debug",
+            "configurePreset": "x64-windows-zig-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-windows-zig-release",
+            "configurePreset": "x64-windows-zig-release",
             "output": {
                 "outputOnFailure": true
             }

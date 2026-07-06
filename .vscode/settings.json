@@ -4,5 +4,5 @@
     "cmake.configureOnEdit": false,
     "clangd.arguments": [
         "--compile-commands-dir=${command:cmake.buildDirectory}"
-    ],
+    ]
 }
