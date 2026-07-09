@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
     // installed/. vcpkg manifest mode syncs an install root to a single
     // triplet and evicts any other triplet's packages, so the per-target root
     // also keeps switching between `zig build` targets cheap.
-    const target_dir = b.fmt("build/{s}", .{targetDirName(b, platform, target.result)});
+    const target_dir = b.fmt("build/{s}", .{targetDirName(b, platform, target.result, optimize)});
     const vcpkg_root = b.fmt("{s}/vcpkg_installed", .{target_dir});
     const install_prefix = b.fmt("{s}/installed", .{target_dir});
 
@@ -57,7 +57,7 @@ pub fn build(b: *std.Build) void {
     mod.addSystemIncludePath(b.path(include_rel));
 
     switch (platform) {
-        .windows, .linux, .macos => buildDesktop(b, mod, platform, lib_rel, install_prefix),
+        .windows, .linux, .macos => buildDesktop(b, mod, platform, optimize, lib_rel, install_prefix),
         .android, .emscripten => {
             // The SDK env vars (ANDROID_NDK_HOME, EMSDK) and directory scans
             // below are host observations the configure cache cannot track; a
@@ -74,12 +74,23 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-/// Directory name under build/ for a target, mirroring the CMake preset
-/// layout: the resolved arch-os-abi triple (e.g. build/aarch64-linux-android).
-fn targetDirName(b: *std.Build, platform: Platform, t: std.Target) []const u8 {
-    if (platform == .emscripten) return b.fmt("{s}-emscripten", .{@tagName(t.cpu.arch)});
-    if (t.abi == .none) return b.fmt("{s}-{s}", .{ @tagName(t.cpu.arch), @tagName(t.os.tag) });
-    return b.fmt("{s}-{s}-{s}", .{ @tagName(t.cpu.arch), @tagName(t.os.tag), @tagName(t.abi) });
+/// Directory name under build/ for a target+optimize combination, mirroring
+/// the CMake preset layout: the resolved arch-os-abi triple plus the optimize
+/// mode (e.g. build/aarch64-linux-android-debug), so builds with different
+/// optimize modes never overwrite each other.
+fn targetDirName(
+    b: *std.Build,
+    platform: Platform,
+    t: std.Target,
+    optimize: std.builtin.OptimizeMode,
+) []const u8 {
+    const mode = b.allocator.dupe(u8, @tagName(optimize)) catch @panic("OOM");
+    _ = std.ascii.lowerString(mode, mode);
+    if (platform == .emscripten)
+        return b.fmt("{s}-emscripten-{s}", .{ @tagName(t.cpu.arch), mode });
+    if (t.abi == .none)
+        return b.fmt("{s}-{s}-{s}", .{ @tagName(t.cpu.arch), @tagName(t.os.tag), mode });
+    return b.fmt("{s}-{s}-{s}-{s}", .{ @tagName(t.cpu.arch), @tagName(t.os.tag), @tagName(t.abi), mode });
 }
 
 /// The install prefix is fixed to build/<target>/installed. Zig's own install
@@ -102,6 +113,7 @@ fn buildDesktop(
     b: *std.Build,
     mod: *std.Build.Module,
     platform: Platform,
+    optimize: std.builtin.OptimizeMode,
     lib_rel: []const u8,
     install_prefix: []const u8,
 ) void {
@@ -144,7 +156,8 @@ fn buildDesktop(
 
     const install_files = b.addUpdateSourceFiles();
     installFile(b, install_files, exe.getEmittedBin(), install_prefix, "bin", exe.out_filename);
-    if (platform == .windows)
+    // No PDB exists when debug info is stripped (zig's default for ReleaseSmall).
+    if (platform == .windows and optimize != .ReleaseSmall)
         installFile(b, install_files, exe.getEmittedPdb(), install_prefix, "bin", app_name ++ ".pdb");
     b.getInstallStep().dependOn(&install_files.step);
 
@@ -198,6 +211,31 @@ fn buildAndroid(
         \\gcc_dir=
         \\
     , .{ sys_include, b.pathJoin(&.{ sys_include, arch_name }), crt_dir }));
+
+    // vcpkg's raylib declares `-Wl,--wrap=fopen` in its usage requirements so
+    // that fopen() routes reads through the APK asset manager (__wrap_fopen)
+    // and writes into the app data dir. Zig's linker step cannot pass --wrap,
+    // so emulate it: a hidden fopen definition intercepts the statically
+    // linked objects' fopen calls (the same set --wrap would rewrite), and
+    // __real_fopen reaches bionic's fopen through its fopen64 alias.
+    const fopen_shim = write_files.add("android-fopen-wrap.c",
+        \\// FILE is only used as an opaque pointer; no headers needed.
+        \\typedef struct FILE FILE;
+        \\FILE *__wrap_fopen(const char *path, const char *mode);
+        \\FILE *fopen64(const char *path, const char *mode);
+        \\
+        \\__attribute__((visibility("hidden"))) FILE *fopen(const char *path, const char *mode)
+        \\{
+        \\    return __wrap_fopen(path, mode);
+        \\}
+        \\
+        \\__attribute__((visibility("hidden"))) FILE *__real_fopen(const char *path, const char *mode)
+        \\{
+        \\    return fopen64(path, mode);
+        \\}
+        \\
+    );
+    mod.addCSourceFile(.{ .file = fopen_shim, .language = .c });
 
     // NDK libc++ headers replace zig's bundled ones (see comment at module creation).
     mod.addIncludePath(b.graph.cwdRelativePath(b.pathJoin(&.{ sys_include, "c++", "v1" })));
@@ -464,13 +502,13 @@ fn vcpkgTriplet(platform: Platform, t: std.Target) []const u8 {
             else => unsupportedArch(t),
         },
         .linux => switch (t.cpu.arch) {
-            .x86_64 => "x64-linux",
-            .aarch64 => "arm64-linux",
+            .x86_64 => "x64-linux-static",
+            .aarch64 => "arm64-linux-static",
             else => unsupportedArch(t),
         },
         .macos => switch (t.cpu.arch) {
-            .aarch64 => "arm64-osx",
-            .x86_64 => "x64-osx",
+            .aarch64 => "arm64-osx-static",
+            .x86_64 => "x64-osx-static",
             else => unsupportedArch(t),
         },
         .android => switch (t.cpu.arch) {
@@ -578,8 +616,7 @@ fn ensureVcpkgInstalled(
         const bootstrap = b.pathJoin(&.{
             root, "vcpkg", if (host_is_windows) "bootstrap-vcpkg.bat" else "bootstrap-vcpkg.sh",
         });
-        if (cwd.access(io, bootstrap, .{})) |_| {} else |_|
-            std.process.fatal("vcpkg submodule is missing or empty; run: git submodule update --init", .{});
+        if (cwd.access(io, bootstrap, .{})) |_| {} else |_| std.process.fatal("vcpkg submodule is missing or empty; run: git submodule update --init", .{});
         std.debug.print("bootstrapping vcpkg...\n", .{});
         // Spawn the .bat directly: zig serializes it through the mitigated
         // cmd.exe form, which survives paths containing cmd metacharacters.
@@ -588,8 +625,7 @@ fn ensureVcpkgInstalled(
         } else {
             runChecked(b, &.{ "sh", bootstrap, "-disableMetrics" }, root);
         }
-        if (cwd.access(io, vcpkg_exe, .{})) |_| {} else |_|
-            std.process.fatal("vcpkg bootstrap did not produce {s}", .{vcpkg_exe});
+        if (cwd.access(io, vcpkg_exe, .{})) |_| {} else |_| std.process.fatal("vcpkg bootstrap did not produce {s}", .{vcpkg_exe});
     }
 
     std.debug.print("installing vcpkg dependencies for {s} (host {s})...\n", .{ triplet, host_triplet });

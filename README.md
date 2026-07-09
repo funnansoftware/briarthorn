@@ -42,12 +42,14 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 There is no separate configure step: `zig build` selects the vcpkg triplet for
 the target, installs the manifest dependencies (bootstrapping vcpkg first if
-needed), and compiles the app. Like the CMake presets, each target gets its own
-directory under `build/`, named after the resolved target triple:
+needed), and compiles the app. Like the CMake presets, each target+optimize
+combination gets its own directory under `build/`, named after the resolved
+target triple and the optimize mode (e.g. `build/x86_64-windows-gnu-debug`,
+`build/aarch64-linux-android-releasesmall`):
 
 ```
-build/<target>/vcpkg_installed/   vcpkg packages for the target's triplet
-build/<target>/installed/         final binaries (bin/, lib/, web/)
+build/<target>-<optimize>/vcpkg_installed/   vcpkg packages for the target's triplet
+build/<target>-<optimize>/installed/         final binaries (bin/, lib/, apk/, web/)
 ```
 
 The first build of a target compiles its dependencies (or restores them from
@@ -60,15 +62,15 @@ Run these on the platform you are targeting — vcpkg builds host-native
 libraries, so desktop targets are not cross-compilable.
 
 ```sh
-zig build             # Debug build to build/<target>/installed/bin/
+zig build             # Debug build to build/<target>-debug/installed/bin/
 zig build run         # build + run (extra args: zig build run -- <args>)
 ```
 
-| Host | Output directory | vcpkg triplet | Notes |
+| Host | Output directory (Debug) | vcpkg triplet | Notes |
 | --- | --- | --- | --- |
-| Windows | `build/x86_64-windows-gnu` | `x64-mingw-static` (overlay) | ports are built with zig targeting `x86_64-windows-gnu`; the MSVC ABI is not supported here (use the CMake MSVC presets) |
-| Linux | `build/x86_64-linux-gnu` | `x64-linux` / `arm64-linux` | |
-| macOS | `build/aarch64-macos` | `arm64-osx` / `x64-osx` | |
+| Windows | `build/x86_64-windows-gnu-debug` | `x64-mingw-static` (overlay) | ports are built with zig targeting `x86_64-windows-gnu`; the MSVC ABI is not supported here (use the CMake MSVC presets) |
+| Linux | `build/x86_64-linux-gnu-debug` | `x64-linux` / `arm64-linux` | |
+| macOS | `build/aarch64-macos-debug` | `arm64-osx` / `x64-osx` | |
 
 ### Android
 
@@ -83,15 +85,15 @@ Requires `ANDROID_NDK_HOME`, plus an Android SDK and a JDK for APK packaging
 regenerated automatically when stale). Produces:
 
 - the NativeActivity library
-  `build/<target>/installed/lib/libhello-triangle.so` (API level 35 by
-  default, matching the CMake presets), and
-- an APK at `build/<target>/installed/apk/app-debug.apk` (`app-release.apk`
-  for release optimize modes), packaged by the gradle project in
-  [android/](android/) from the zig-built library — gradle's own CMake native
-  build is skipped.
+  `build/<target>-<optimize>/installed/lib/libhello-triangle.so` (API level 35
+  by default, matching the CMake presets), and
+- an APK at `build/<target>-<optimize>/installed/apk/app-debug.apk`
+  (`app-release.apk` for release optimize modes), packaged by the gradle
+  project in [android/](android/) from the zig-built library — gradle's own
+  CMake native build is skipped.
 
 Install it on a device or emulator with
-`adb install build/aarch64-linux-android/installed/apk/app-debug.apk`.
+`adb install build/aarch64-linux-android-debug/installed/apk/app-debug.apk`.
 
 ### Web
 
@@ -100,11 +102,11 @@ zig build -Dtarget=wasm32-emscripten
 ```
 
 Requires emsdk (see prerequisites). Produces
-`build/wasm32-emscripten/installed/web/hello-triangle.{html,js,wasm}`. Browsers
-won't load wasm from `file://`, so serve the directory:
+`build/wasm32-emscripten-<optimize>/installed/web/hello-triangle.{html,js,wasm}`.
+Browsers won't load wasm from `file://`, so serve the directory:
 
 ```sh
-python -m http.server -d build/wasm32-emscripten/installed/web
+python -m http.server -d build/wasm32-emscripten-debug/installed/web
 # then open http://localhost:8000/hello-triangle.html
 ```
 
@@ -112,15 +114,16 @@ python -m http.server -d build/wasm32-emscripten/installed/web
 
 | Option | Meaning |
 | --- | --- |
-| `-Doptimize=Debug\|ReleaseSafe\|ReleaseFast\|ReleaseSmall` | optimization mode (default `Debug`; Debug links vcpkg's debug libraries) |
+| `-Doptimize=Debug\|ReleaseSafe\|ReleaseFast\|ReleaseSmall` | optimization mode (default `Debug`; Debug links vcpkg's debug libraries). Each mode installs to its own `build/<target>-<optimize>/` tree |
 | `-Dandroid-api=<n>` | Android API level (default 35) |
 | `-Dvcpkg-triplet=<t>` | override the vcpkg triplet (you own ABI compatibility) |
 
 Notes:
 
-- Each target's vcpkg packages live in its own `build/<target>/vcpkg_installed/`,
-  so switching targets never invalidates another target's libraries. Deleting a
-  `build/<target>/` directory is safe — the next build reinstalls everything.
+- Each build directory has its own `vcpkg_installed/`, so switching targets or
+  optimize modes never invalidates another configuration. Deleting a
+  `build/<target>-<optimize>/` directory is safe — the next build reinstalls
+  everything (usually restored from vcpkg's binary cache in seconds).
 - Editing `vcpkg.json`, `vcpkg-configuration.json`, or anything under
   `cmake/triplets`, `cmake/toolchain`, or `cmake/compiler` automatically
   re-runs the vcpkg install on the next build.
