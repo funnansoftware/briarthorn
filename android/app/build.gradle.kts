@@ -11,6 +11,12 @@ val vcpkgHostTriplet = if (System.getProperty("os.name").contains("Windows", ign
     "x64-linux"
 }
 
+// When the zig build drives packaging (zig build -Dtarget=<arch>-linux-android),
+// it stages the prebuilt native library under <dir>/<abi>/ and passes
+// -PzigJniLibs=<dir>; the CMake externalNativeBuild is skipped entirely and the
+// staged library is packaged instead.
+val zigJniLibs: String? = (project.findProperty("zigJniLibs") as String?)?.takeIf { it.isNotEmpty() }
+
 // Read sdk.dir from local.properties (written by cmake/android/toolchain.cmake with
 // forward slashes) so we can pass the NDK path to cmake with forward slashes.
 // AGP's NdkHandler uses Java's File.absolutePath which produces backslashes on Windows;
@@ -41,12 +47,14 @@ android {
         versionCode   = 1
         versionName   = "1.0"
 
-        ndk {
-            // Only package the arm64-v8a ABI; add "x86_64" for emulator support
+        if (zigJniLibs == null) ndk {
+            // Only package the arm64-v8a ABI; add "x86_64" for emulator support.
+            // (When zig stages the library, the jniLibs dir contains exactly the
+            // target's ABI, so no filter is needed.)
             abiFilters += "arm64-v8a"
         }
 
-        externalNativeBuild {
+        if (zigJniLibs == null) externalNativeBuild {
             cmake {
                 // vcpkg is the primary toolchain; it chain-loads the NDK toolchain.
                 // AGP still injects ANDROID_ABI / ANDROID_PLATFORM via its own
@@ -85,11 +93,16 @@ android {
         }
     }
 
-    externalNativeBuild {
+    val stagedJniLibs = zigJniLibs
+    if (stagedJniLibs == null) externalNativeBuild {
         cmake {
             // Path is relative to this build.gradle.kts file (android/app/)
             path    = file("../../CMakeLists.txt")
             version = "3.28.3+"
+        }
+    } else sourceSets {
+        getByName("main") {
+            jniLibs.srcDir(stagedJniLibs)
         }
     }
 }
