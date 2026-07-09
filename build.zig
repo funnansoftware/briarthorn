@@ -24,15 +24,27 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    exe_mod.addIncludePath(
-        b.graph.cwdRelativePath("build/x64-windows-zig-debug/vcpkg_installed/x64-mingw-static/include"),
-    );
-    exe_mod.addLibraryPath(
-        b.graph.cwdRelativePath("build/x64-windows-zig-debug/vcpkg_installed/x64-mingw-static/lib"),
-    );
+    exe_mod.addIncludePath(b.graph.cwdRelativePath("build/x64-linux-zig-debug/vcpkg_installed/x64-linux/include"));
+    exe_mod.addLibraryPath(b.graph.cwdRelativePath("build/x64-linux-zig-debug/vcpkg_installed/x64-linux/lib"));
+
+    // exe_mod.addIncludePath(
+    //     b.graph.cwdRelativePath("build/x64-windows-zig-debug/vcpkg_installed/x64-mingw-static/include"),
+    // );
+    // exe_mod.addLibraryPath(
+    //     b.graph.cwdRelativePath("build/x64-windows-zig-debug/vcpkg_installed/x64-mingw-static/lib"),
+    // );
     exe_mod.linkSystemLibrary("raylib", .{});
     exe_mod.linkSystemLibrary("glfw3", .{});
-    exe_mod.linkSystemLibrary("gdi32", .{});
+
+    // X11 libraries required by raylib on Linux
+    exe_mod.linkSystemLibrary("X11", .{});
+    exe_mod.linkSystemLibrary("Xrandr", .{});
+    exe_mod.linkSystemLibrary("Xinerama", .{});
+    exe_mod.linkSystemLibrary("Xi", .{});
+    exe_mod.linkSystemLibrary("Xcursor", .{});
+    exe_mod.linkSystemLibrary("Xfixes", .{});
+
+    // exe_mod.linkSystemLibrary("gdi32", .{});
 
     const exe = b.addExecutable(.{
         .name = "hello-triangle",

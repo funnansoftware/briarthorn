@@ -2,7 +2,7 @@
     "version": 7,
     "configurePresets": [
         {
-            "name": "compiler-zig",
+            "name": "compiler-zig-windows",
             "hidden": true,
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": true,

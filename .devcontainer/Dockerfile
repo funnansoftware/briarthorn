@@ -125,6 +125,14 @@ ENV EMSDK=/opt/emsdk
 ENV EMSCRIPTEN_ROOT=/opt/emsdk/upstream/emscripten
 ENV PATH=${EMSDK}:${EMSCRIPTEN_ROOT}:${ANDROID_HOME}/emulator:${ANDROID_HOME}/platform-tools:${ANDROID_NDK_HOME}:${PATH}
 
+# Zig (kept in sync with the .zigversion file at the repo root).
+ARG ZIG_VERSION=0.17.0-dev.1275+59a628c6d
+RUN curl -fsSLo /tmp/zig.tar.xz "https://ziglang.org/builds/zig-x86_64-linux-${ZIG_VERSION}.tar.xz" \
+    && mkdir -p /opt/zig \
+    && tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 \
+    && ln -sf /opt/zig/zig /usr/local/bin/zig \
+    && rm /tmp/zig.tar.xz
+
 # Raylib
 RUN apt-get update && apt-get install -y \
     libxinerama-dev libxcursor-dev \

@@ -3,6 +3,7 @@
     "include": [
         "../compiler/clang.json",
         "../compiler/gcc.json",
+        "../compiler/zig-linux.json",
         "../config/binaryDir.json",
         "../config/debug.json",
         "../config/ninja.json",
@@ -59,6 +60,28 @@
                 "host-x64-linux",
                 "target-x64-linux"
             ]
+        },
+        {
+            "name": "x64-linux-zig-debug",
+            "inherits": [
+                "config-binaryDir",
+                "config-debug",
+                "config-vcpkg",
+                "compiler-zig-linux",
+                "host-x64-linux",
+                "target-x64-linux"
+            ]
+        },
+        {
+            "name": "x64-linux-zig-release",
+            "inherits": [
+                "config-binaryDir",
+                "config-release",
+                "config-vcpkg",
+                "compiler-zig-linux",
+                "host-x64-linux",
+                "target-x64-linux"
+            ]
         }
     ],
     "buildPresets": [
@@ -77,6 +100,14 @@
         {
             "name": "x64-linux-clang-release",
             "configurePreset": "x64-linux-clang-release"
+        },
+        {
+            "name": "x64-linux-zig-debug",
+            "configurePreset": "x64-linux-zig-debug"
+        },
+        {
+            "name": "x64-linux-zig-release",
+            "configurePreset": "x64-linux-zig-release"
         }
     ],
     "testPresets": [
@@ -104,6 +135,20 @@
         {
             "name": "x64-linux-clang-release",
             "configurePreset": "x64-linux-clang-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-linux-zig-debug",
+            "configurePreset": "x64-linux-zig-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-linux-zig-release",
+            "configurePreset": "x64-linux-zig-release",
             "output": {
                 "outputOnFailure": true
             }
