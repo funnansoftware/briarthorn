@@ -20,3 +20,8 @@ set(CMAKE_CXX_COMPILER_TARGET x86_64-windows-gnu)
 
 set(CMAKE_AR      "${_zig_compiler_dir}/zigar${_zig_ext}"     CACHE FILEPATH "" FORCE)
 set(CMAKE_RANLIB  "${_zig_compiler_dir}/zigranlib${_zig_ext}" CACHE FILEPATH "" FORCE)
+
+# zig cc enables UBSan in trap mode by default; ports are third-party code we
+# don't sanitize (see zig-linux.cmake).
+string(APPEND CMAKE_C_FLAGS_INIT   " -fno-sanitize=undefined")
+string(APPEND CMAKE_CXX_FLAGS_INIT " -fno-sanitize=undefined")

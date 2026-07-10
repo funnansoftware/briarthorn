@@ -18,8 +18,21 @@ endif()
 
 set(CMAKE_C_COMPILER   "${_zig_compiler_dir}/zigcc${_zig_ext}")
 set(CMAKE_CXX_COMPILER "${_zig_compiler_dir}/zig++${_zig_ext}")
-set(CMAKE_C_COMPILER_TARGET   x86_64-linux-gnu)
-set(CMAKE_CXX_COMPILER_TARGET x86_64-linux-gnu)
+# Do NOT set CMAKE_*_COMPILER_TARGET here: an explicit --target puts zig cc in
+# cross-compile mode, so it links its bundled glibc baseline and stops
+# searching system library dirs (breaks FindX11 and glibc symbol resolution).
+# Leaving it unset means native, which detects the real system glibc.
+
+# zig's verbose link output exposes no implicit -L dirs, so CMake cannot
+# infer the Debian/Ubuntu multiarch libdir; without this, find_library never
+# looks in /usr/lib/x86_64-linux-gnu (where libX11 & friends live).
+set(CMAKE_LIBRARY_ARCHITECTURE x86_64-linux-gnu)
+
+# zig cc enables UBSan in trap mode by default. Ports are third-party code we
+# don't sanitize (e.g. raylib's GetCurrentMonitor overflows int on WSLg's huge
+# virtual monitor coordinates and would abort at runtime).
+string(APPEND CMAKE_C_FLAGS_INIT   " -fno-sanitize=undefined")
+string(APPEND CMAKE_CXX_FLAGS_INIT " -fno-sanitize=undefined")
 
 set(CMAKE_AR      "${_zig_compiler_dir}/zigar${_zig_ext}"     CACHE FILEPATH "" FORCE)
 set(CMAKE_RANLIB  "${_zig_compiler_dir}/zigranlib${_zig_ext}" CACHE FILEPATH "" FORCE)
