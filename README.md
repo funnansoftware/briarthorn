@@ -59,7 +59,9 @@ not re-run until `vcpkg.json` or the toolchain files change.
 ### Desktop (native)
 
 Run these on the platform you are targeting — vcpkg builds host-native
-libraries, so desktop targets are not cross-compilable.
+libraries, so desktop targets are not cross-compilable (`zig build` refuses
+early with an explanation; use the devcontainer or WSL for Linux builds from
+Windows). Android and web targets cross-compile from any host.
 
 ```sh
 zig build             # Debug build to build/<target>-debug/installed/bin/
@@ -69,8 +71,8 @@ zig build run         # build + run (extra args: zig build run -- <args>)
 | Host | Output directory (Debug) | vcpkg triplet | Notes |
 | --- | --- | --- | --- |
 | Windows | `build/x86_64-windows-gnu-debug` | `x64-mingw-static` (overlay) | ports are built with zig targeting `x86_64-windows-gnu`; the MSVC ABI is not supported here (use the CMake MSVC presets) |
-| Linux | `build/x86_64-linux-gnu-debug` | `x64-linux` / `arm64-linux` | |
-| macOS | `build/aarch64-macos-debug` | `arm64-osx` / `x64-osx` | |
+| Linux | `build/x86_64-linux-gnu-debug` | `x64-linux` (overlay) / `arm64-linux` | x64 ports are built with zig via the overlay triplet |
+| macOS | `build/aarch64-macos-debug` | `arm64-osx` / `x64-osx` | ports use the system clang (zig overlay pending a mac to verify on) |
 
 ### Android
 

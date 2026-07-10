@@ -12,6 +12,26 @@ pub fn build(b: *std.Build) void {
 
     const platform = classify(target.result);
 
+    // Zig cross-compiles to any desktop target, and the zig overlay triplets
+    // build the vcpkg dependencies with zig too — but the target platform's
+    // system pieces still have to be present on the build machine (X11 headers
+    // and libraries on linux, the platform SDK on macos). So desktop targets
+    // require a matching host; only android and wasm are cross-compiled.
+    // Fail here with an explanation instead of deep in vcpkg.
+    switch (platform) {
+        .windows, .linux, .macos => if (target.result.os.tag != b.graph.host.result.os.tag)
+            std.process.fatal("cannot build the {s} desktop target on a {s} host: the dependencies " ++
+                "need {s} system libraries (e.g. X11) that only exist on a {s} build machine. " ++
+                "Build on a matching host (the devcontainer or WSL covers linux); android and " ++
+                "wasm targets do cross-compile from any host.", .{
+                @tagName(target.result.os.tag),
+                @tagName(b.graph.host.result.os.tag),
+                @tagName(target.result.os.tag),
+                @tagName(target.result.os.tag),
+            }),
+        .android, .emscripten => {},
+    }
+
     // Android needs a concrete API level to pick bionic CRT objects; fold it
     // into the target so __ANDROID_API__ matches what we link against.
     const android_api = b.option(u32, "android-api", "Android API level (android targets only)") orelse 35;
@@ -473,9 +493,8 @@ fn resolveEmscriptenRoot(b: *std.Build) []const u8 {
     const host_is_windows = b.graph.host.result.os.tag == .windows;
     const emsdk_dir = b.pathJoin(&.{ root, "emsdk" });
     const emsdk_script = b.pathJoin(&.{ emsdk_dir, if (host_is_windows) "emsdk.bat" else "emsdk" });
-    if (cwd.access(io, emsdk_script, .{})) |_| {} else |_|
-        std.process.fatal("emscripten not found: initialize the emsdk submodule " ++
-            "(git submodule update --init), or set EMSDK/EMSCRIPTEN_ROOT, or put emcc on PATH", .{});
+    if (cwd.access(io, emsdk_script, .{})) |_| {} else |_| std.process.fatal("emscripten not found: initialize the emsdk submodule " ++
+        "(git submodule update --init), or set EMSDK/EMSCRIPTEN_ROOT, or put emcc on PATH", .{});
 
     const em_root = b.pathJoin(&.{ emsdk_dir, "upstream", "emscripten" });
     if (cwd.access(io, emccExecutable(b, em_root), .{})) |_| return em_root else |_| {}
@@ -536,14 +555,16 @@ fn vcpkgTriplet(platform: Platform, t: std.Target) []const u8 {
                 "x64-mingw-static",
             else => unsupportedArch(t),
         },
+        // The default linux/osx triplets already build static libraries
+        // (VCPKG_LIBRARY_LINKAGE static); no "-static" variants exist for them.
         .linux => switch (t.cpu.arch) {
-            .x86_64 => "x64-linux-static",
-            .aarch64 => "arm64-linux-static",
+            .x86_64 => "x64-linux",
+            .aarch64 => "arm64-linux",
             else => unsupportedArch(t),
         },
         .macos => switch (t.cpu.arch) {
-            .aarch64 => "arm64-osx-static",
-            .x86_64 => "x64-osx-static",
+            .aarch64 => "arm64-osx",
+            .x86_64 => "x64-osx",
             else => unsupportedArch(t),
         },
         .android => switch (t.cpu.arch) {
@@ -635,9 +656,18 @@ fn ensureVcpkgInstalled(
         }
     } else |_| {}
 
+    // The zig compiler wrappers used by the overlay triplets resolve `zig`
+    // from PATH; guarantee the vcpkg child sees the same zig running this
+    // build, wherever it is installed.
+    var vcpkg_env = b.graph.environ_map.clone(b.allocator) catch @panic("OOM");
+    if (std.fs.path.dirname(b.graph.zig_exe)) |zig_dir| {
+        const old_path = vcpkg_env.get("PATH") orelse "";
+        vcpkg_env.put("PATH", b.fmt("{s}{c}{s}", .{
+            zig_dir, std.fs.path.delimiter, old_path,
+        })) catch @panic("OOM");
+    }
+
     // Fail early, before a long vcpkg run, if a required SDK is missing.
-    var vcpkg_env: ?*const std.process.Environ.Map = null;
-    var emscripten_env: std.process.Environ.Map = undefined;
     switch (platform) {
         .android => if (b.graph.environ_map.get("ANDROID_NDK_HOME") == null)
             std.process.fatal("ANDROID_NDK_HOME must point at an Android NDK to install the {s} triplet", .{triplet}),
@@ -646,9 +676,7 @@ fn ensureVcpkgInstalled(
             // this env var; point it at whichever emscripten was resolved
             // (possibly the just-bootstrapped emsdk submodule).
             const em_root = resolveEmscriptenRoot(b);
-            emscripten_env = b.graph.environ_map.clone(b.allocator) catch @panic("OOM");
-            emscripten_env.put("EMSCRIPTEN_ROOT", em_root) catch @panic("OOM");
-            vcpkg_env = &emscripten_env;
+            vcpkg_env.put("EMSCRIPTEN_ROOT", em_root) catch @panic("OOM");
         },
         else => {},
     }
@@ -683,7 +711,7 @@ fn ensureVcpkgInstalled(
         b.fmt("--triplet={s}", .{triplet}),
         b.fmt("--host-triplet={s}", .{host_triplet}),
         b.fmt("--x-install-root={s}", .{install_root}),
-    }, root, vcpkg_env);
+    }, root, &vcpkg_env);
 
     cwd.createDirPath(io, b.pathJoin(&.{ root, install_root })) catch {};
     cwd.writeFile(io, .{ .sub_path = stamp_path, .data = &want }) catch |err|
