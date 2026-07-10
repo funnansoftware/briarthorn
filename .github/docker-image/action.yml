@@ -1,0 +1,81 @@
+name: Docker Image
+description: Build and push a devcontainer image, resolving the correct tag for PRs vs main.
+
+inputs:
+  image-tag:
+    description: Tag suffix for the shared devcontainer image.
+    required: false
+    default: devcontainer
+  token:
+    description: GitHub token for GHCR authentication.
+    required: true
+
+outputs:
+  image:
+    description: The fully-qualified image reference to use in downstream jobs.
+    value: ${{ steps.resolve.outputs.image }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: detect-changes
+      id: filter
+      uses: dorny/paths-filter@v3
+      with:
+        token: ""
+        filters: |
+          changed:
+            - '.devcontainer/Dockerfile'
+            - '.devcontainer/devcontainer.json'
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.token }}
+
+    - name: check-image-exists
+      id: image
+      shell: bash
+      run: |
+        if docker manifest inspect ghcr.io/${{ github.repository }}:${{ inputs.image-tag }} > /dev/null 2>&1; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: resolve-image
+      id: resolve
+      shell: bash
+      env:
+        REPO: ghcr.io/${{ github.repository }}
+        IMAGE_TAG: ${{ inputs.image-tag }}
+      run: |
+        if [[ "${{ steps.filter.outputs.changed }}" != "true" && "${{ steps.image.outputs.exists }}" != "false" ]]; then
+          echo "image=${REPO}:${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "need-build=false" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "image=${REPO}:${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "need-build=true" >> $GITHUB_OUTPUT
+          {
+            echo "tags<<EOF"
+            echo "${REPO}:${IMAGE_TAG}"
+            echo "${REPO}:${IMAGE_TAG}-${{ github.sha }}"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+        else
+          echo "image=${REPO}:${IMAGE_TAG}-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "need-build=true" >> $GITHUB_OUTPUT
+          echo "tags=${REPO}:${IMAGE_TAG}-${{ github.sha }}" >> $GITHUB_OUTPUT
+        fi
+
+    - uses: docker/build-push-action@v6
+      if: steps.resolve.outputs.need-build == 'true'
+      with:
+        context: .devcontainer
+        push: true
+        tags: ${{ steps.resolve.outputs.tags }}
