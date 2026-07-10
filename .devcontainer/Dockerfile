@@ -50,14 +50,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-22 100 \
     && update-alternatives --install /usr/bin/clang-tidy-diff clang-tidy-diff /usr/bin/clang-tidy-diff-22.py 100
 
-# Emscripten.
-ARG EMSDK_VERSION=latest
-RUN git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk \
-    && /opt/emsdk/emsdk install ${EMSDK_VERSION} \
-    && /opt/emsdk/emsdk activate ${EMSDK_VERSION} \
-    && nodeBin="$(find /opt/emsdk/node -type f -path '*/bin/node' | head -n 1)" \
-    && test -n "${nodeBin}" \
-    && ln -sf "${nodeBin}" /usr/local/bin/node
+# Emscripten comes from the repo's emsdk submodule (bootstrapped on the first
+# web build), not from the container image.
 
 # Emulator runtime dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -121,9 +115,7 @@ RUN curl -fsSLo /tmp/gradle.zip "https://services.gradle.org/distributions/gradl
 
 ENV ANDROID_NDK_HOME=/opt/android/ndk/android-ndk-${NDK_VERSION}
 
-ENV EMSDK=/opt/emsdk
-ENV EMSCRIPTEN_ROOT=/opt/emsdk/upstream/emscripten
-ENV PATH=${EMSDK}:${EMSCRIPTEN_ROOT}:${ANDROID_HOME}/emulator:${ANDROID_HOME}/platform-tools:${ANDROID_NDK_HOME}:${PATH}
+ENV PATH=${ANDROID_HOME}/emulator:${ANDROID_HOME}/platform-tools:${ANDROID_NDK_HOME}:${PATH}
 
 # Zig (kept in sync with the .zigversion file at the repo root).
 ARG ZIG_VERSION=0.17.0-dev.1275+59a628c6d

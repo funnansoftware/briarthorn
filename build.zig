@@ -453,16 +453,51 @@ fn findEmscriptenRoot(b: *std.Build) ?EmscriptenRoot {
     return null;
 }
 
-/// Like findEmscriptenRoot, but verifies emcc is actually present so a cloned
-/// but never installed/activated emsdk fails fast instead of deep inside vcpkg.
+/// Resolves an emscripten installation, verifying emcc is actually present so
+/// a broken setup fails fast instead of deep inside vcpkg. When no environment
+/// override is set, falls back to the emsdk submodule, bootstrapping it on
+/// first use (like the vcpkg submodule).
 fn resolveEmscriptenRoot(b: *std.Build) []const u8 {
-    const found = findEmscriptenRoot(b) orelse
-        std.process.fatal("emscripten not found: set EMSDK or EMSCRIPTEN_ROOT, or put emcc on PATH", .{});
-    const emcc = emccExecutable(b, found.path);
-    std.Io.Dir.cwd().access(b.graph.io, emcc, .{}) catch
-        std.process.fatal("emcc not found at '{s}' (from {s}); run 'emsdk install latest && " ++
-            "emsdk activate latest', or fix the environment variable", .{ emcc, found.source });
-    return found.path;
+    const io = b.graph.io;
+    const cwd = std.Io.Dir.cwd();
+
+    if (findEmscriptenRoot(b)) |found| {
+        const emcc = emccExecutable(b, found.path);
+        cwd.access(io, emcc, .{}) catch
+            std.process.fatal("emcc not found at '{s}' (from {s}); run 'emsdk install latest && " ++
+                "emsdk activate latest', or fix the environment variable", .{ emcc, found.source });
+        return found.path;
+    }
+
+    const root = rootPath(b);
+    const host_is_windows = b.graph.host.result.os.tag == .windows;
+    const emsdk_dir = b.pathJoin(&.{ root, "emsdk" });
+    const emsdk_script = b.pathJoin(&.{ emsdk_dir, if (host_is_windows) "emsdk.bat" else "emsdk" });
+    if (cwd.access(io, emsdk_script, .{})) |_| {} else |_|
+        std.process.fatal("emscripten not found: initialize the emsdk submodule " ++
+            "(git submodule update --init), or set EMSDK/EMSCRIPTEN_ROOT, or put emcc on PATH", .{});
+
+    const em_root = b.pathJoin(&.{ emsdk_dir, "upstream", "emscripten" });
+    if (cwd.access(io, emccExecutable(b, em_root), .{})) |_| return em_root else |_| {}
+
+    // We are about to mutate the emsdk checkout; never cache this configure run.
+    b.graph.poisonCache();
+    // "latest" resolves against the release list checked into the pinned
+    // submodule commit, so the submodule pin determines the toolchain version.
+    std.debug.print("bootstrapping the emsdk submodule (one-time emscripten toolchain download)...\n", .{});
+    if (host_is_windows) {
+        runChecked(b, &.{ emsdk_script, "install", "latest" }, root, null);
+        runChecked(b, &.{ emsdk_script, "activate", "latest" }, root, null);
+    } else {
+        runChecked(b, &.{ "sh", emsdk_script, "install", "latest" }, root, null);
+        runChecked(b, &.{ "sh", emsdk_script, "activate", "latest" }, root, null);
+    }
+    // Re-probe: the emcc file name (emcc.bat/emcc.exe/emcc) is only knowable
+    // now that the toolchain exists.
+    const emcc = emccExecutable(b, em_root);
+    cwd.access(io, emcc, .{}) catch
+        std.process.fatal("emsdk bootstrap did not produce {s}", .{emcc});
+    return em_root;
 }
 
 fn emccExecutable(b: *std.Build, em_root: []const u8) []const u8 {
@@ -601,10 +636,20 @@ fn ensureVcpkgInstalled(
     } else |_| {}
 
     // Fail early, before a long vcpkg run, if a required SDK is missing.
+    var vcpkg_env: ?*const std.process.Environ.Map = null;
+    var emscripten_env: std.process.Environ.Map = undefined;
     switch (platform) {
         .android => if (b.graph.environ_map.get("ANDROID_NDK_HOME") == null)
             std.process.fatal("ANDROID_NDK_HOME must point at an Android NDK to install the {s} triplet", .{triplet}),
-        .emscripten => _ = resolveEmscriptenRoot(b),
+        .emscripten => {
+            // vcpkg's wasm32-emscripten triplet locates the toolchain through
+            // this env var; point it at whichever emscripten was resolved
+            // (possibly the just-bootstrapped emsdk submodule).
+            const em_root = resolveEmscriptenRoot(b);
+            emscripten_env = b.graph.environ_map.clone(b.allocator) catch @panic("OOM");
+            emscripten_env.put("EMSCRIPTEN_ROOT", em_root) catch @panic("OOM");
+            vcpkg_env = &emscripten_env;
+        },
         else => {},
     }
 
@@ -621,9 +666,9 @@ fn ensureVcpkgInstalled(
         // Spawn the .bat directly: zig serializes it through the mitigated
         // cmd.exe form, which survives paths containing cmd metacharacters.
         if (host_is_windows) {
-            runChecked(b, &.{ bootstrap, "-disableMetrics" }, root);
+            runChecked(b, &.{ bootstrap, "-disableMetrics" }, root, null);
         } else {
-            runChecked(b, &.{ "sh", bootstrap, "-disableMetrics" }, root);
+            runChecked(b, &.{ "sh", bootstrap, "-disableMetrics" }, root, null);
         }
         if (cwd.access(io, vcpkg_exe, .{})) |_| {} else |_| std.process.fatal("vcpkg bootstrap did not produce {s}", .{vcpkg_exe});
     }
@@ -638,7 +683,7 @@ fn ensureVcpkgInstalled(
         b.fmt("--triplet={s}", .{triplet}),
         b.fmt("--host-triplet={s}", .{host_triplet}),
         b.fmt("--x-install-root={s}", .{install_root}),
-    }, root);
+    }, root, vcpkg_env);
 
     cwd.createDirPath(io, b.pathJoin(&.{ root, install_root })) catch {};
     cwd.writeFile(io, .{ .sub_path = stamp_path, .data = &want }) catch |err|
@@ -687,11 +732,17 @@ fn rootPath(b: *std.Build) []const u8 {
     return if (s.len == 0) "." else s;
 }
 
-fn runChecked(b: *std.Build, argv: []const []const u8, cwd_path: []const u8) void {
+fn runChecked(
+    b: *std.Build,
+    argv: []const []const u8,
+    cwd_path: []const u8,
+    environ: ?*const std.process.Environ.Map,
+) void {
     const io = b.graph.io;
     var child = std.process.spawn(io, .{
         .argv = argv,
         .cwd = .{ .path = cwd_path },
+        .environ_map = environ,
         // The configure runner's stdout carries its configuration protocol;
         // pump the child's output to stderr so it reaches the console instead.
         .stdout = .pipe,
