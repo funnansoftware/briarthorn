@@ -50,9 +50,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-22 100 \
     && update-alternatives --install /usr/bin/clang-tidy-diff clang-tidy-diff /usr/bin/clang-tidy-diff-22.py 100
 
-# Emscripten comes from the repo's emsdk submodule (bootstrapped on the first
-# web build), not from the container image.
-
 # Emulator runtime dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpulse0 \
