@@ -1,4 +1,4 @@
-name: osx
+name: macos
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - preset: arm64-osx-clang-release
+          - preset: arm64-macos-clang-release
             target: install
 
     steps:
