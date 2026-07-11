@@ -71,8 +71,8 @@ zig build run         # build + run (extra args: zig build run -- <args>)
 | Host | Output directory (Debug) | vcpkg triplet | Notes |
 | --- | --- | --- | --- |
 | Windows | `build/x86_64-windows-gnu-debug` | `x64-mingw-static` (overlay) | ports are built with zig targeting `x86_64-windows-gnu`; the MSVC ABI is not supported here (use the CMake MSVC presets) |
-| Linux | `build/x86_64-linux-gnu-debug` | `x64-linux` (overlay) / `arm64-linux` | x64 ports are built with zig via the overlay triplet |
-| macOS | `build/aarch64-macos-debug` | `arm64-osx` / `x64-osx` | ports use the system clang (zig overlay pending a mac to verify on) |
+| Linux | `build/x86_64-linux-gnu-debug` | `x64-linux-zig` / `arm64-linux-zig` (overlay) | ports are built with zig via the overlay triplet |
+| macOS | `build/aarch64-macos-debug` | `arm64-osx-zig` / `x64-osx-zig` (overlay) | ports are built with zig via the overlay triplet (zig cc locates the macOS SDK); build natively per architecture |
 
 ### Android
 
@@ -130,8 +130,8 @@ Notes:
   `build/<target>-<optimize>/` directory is safe — the next build reinstalls
   everything (usually restored from vcpkg's binary cache in seconds).
 - Editing `vcpkg.json`, `vcpkg-configuration.json`, or anything under
-  `cmake/triplets`, `cmake/toolchain`, or `cmake/preset/compiler` automatically
-  re-runs the vcpkg install on the next build.
+  `cmake/triplets`, `cmake/toolchain`, or `scripts` (the zig compiler wrappers)
+  automatically re-runs the vcpkg install on the next build.
 
 ## Building with CMake presets
 

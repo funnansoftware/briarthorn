@@ -591,16 +591,18 @@ fn vcpkgTriplet(platform: Platform, t: std.Target) []const u8 {
                 "x64-mingw-static",
             else => unsupportedArch(t),
         },
-        // The default linux/osx triplets already build static libraries
-        // (VCPKG_LIBRARY_LINKAGE static); no "-static" variants exist for them.
+        // The "-zig" overlay triplets in cmake/triplets build ports with zig
+        // (chainloaded toolchain), so a `zig build` compiles its dependencies
+        // with the same compiler as the app. They are named distinctly from the
+        // stock triplets so the native CMake presets are unaffected.
         .linux => switch (t.cpu.arch) {
-            .x86_64 => "x64-linux",
-            .aarch64 => "arm64-linux",
+            .x86_64 => "x64-linux-zig",
+            .aarch64 => "arm64-linux-zig",
             else => unsupportedArch(t),
         },
         .macos => switch (t.cpu.arch) {
-            .aarch64 => "arm64-osx",
-            .x86_64 => "x64-osx",
+            .aarch64 => "arm64-osx-zig",
+            .x86_64 => "x64-osx-zig",
             else => unsupportedArch(t),
         },
         .android => switch (t.cpu.arch) {
@@ -761,7 +763,7 @@ fn hashToolchainInputs(b: *std.Build, hasher: *std.crypto.hash.sha2.Sha256) void
     const io = b.graph.io;
     const cwd = std.Io.Dir.cwd();
     const root = rootPath(b);
-    const dirs = [_][]const u8{ "cmake/triplets", "cmake/toolchain", "cmake/preset/compiler" };
+    const dirs = [_][]const u8{ "cmake/triplets", "cmake/toolchain", "scripts" };
     for (dirs) |rel_dir| {
         var dir = cwd.openDir(io, b.pathJoin(&.{ root, rel_dir }), .{ .iterate = true }) catch continue;
         defer dir.close(io);

@@ -9,7 +9,8 @@
         "../config/release.json",
         "../config/vcpkg.json",
         "../host/x64-windows.json",
-        "../target/x64-windows.json"
+        "../target/x64-windows.json",
+        "../target/x64-windows-zig.json"
     ],
     "configurePresets": [
         {
@@ -45,7 +46,7 @@
                 "config-ninja",
                 "config-vcpkg",
                 "host-x64-windows",
-                "target-x64-windows"
+                "target-x64-windows-zig"
             ]
         },
         {
@@ -57,7 +58,7 @@
                 "config-release",
                 "config-vcpkg",
                 "host-x64-windows",
-                "target-x64-windows"
+                "target-x64-windows-zig"
             ]
         }
     ],

@@ -10,7 +10,8 @@
         "../config/release.json",
         "../config/vcpkg.json",
         "../host/x64-linux.json",
-        "../target/x64-linux.json"
+        "../target/x64-linux.json",
+        "../target/x64-linux-zig.json"
     ],
     "configurePresets": [
         {
@@ -69,7 +70,7 @@
                 "config-vcpkg",
                 "compiler-zig-linux",
                 "host-x64-linux",
-                "target-x64-linux"
+                "target-x64-linux-zig"
             ]
         },
         {
@@ -80,7 +81,7 @@
                 "config-vcpkg",
                 "compiler-zig-linux",
                 "host-x64-linux",
-                "target-x64-linux"
+                "target-x64-linux-zig"
             ]
         }
     ],

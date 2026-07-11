@@ -1,13 +1,22 @@
 # vcpkg chainload toolchain that builds ports with zig targeting
-# x86_64-linux-gnu, matching the application toolchain.
+# <arch>-linux-gnu, matching the application toolchain. The architecture comes
+# from the overlay triplet's VCPKG_TARGET_ARCHITECTURE, so one file serves both
+# x64-linux-zig and arm64-linux-zig.
 #
 # Note: ports that need target-platform system headers (e.g. X11 for glfw3)
 # still require them to be installed on the build machine; zig replaces the
-# compiler, not the platform SDK.
+# compiler, not the platform SDK. Because we stay native (no --target, see
+# below), the build machine must match the target architecture.
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR x86_64)
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+    set(CMAKE_SYSTEM_PROCESSOR aarch64)
+    set(_zig_multiarch aarch64-linux-gnu)
+else()
+    set(CMAKE_SYSTEM_PROCESSOR x86_64)
+    set(_zig_multiarch x86_64-linux-gnu)
+endif()
 
-get_filename_component(_zig_compiler_dir "${CMAKE_CURRENT_LIST_DIR}/../preset/compiler" ABSOLUTE)
+get_filename_component(_zig_compiler_dir "${CMAKE_CURRENT_LIST_DIR}/../../scripts" ABSOLUTE)
 
 # The wrappers come in pairs; pick by the machine running the build.
 if(CMAKE_HOST_WIN32)
@@ -25,8 +34,8 @@ set(CMAKE_CXX_COMPILER "${_zig_compiler_dir}/zig++${_zig_ext}")
 
 # zig's verbose link output exposes no implicit -L dirs, so CMake cannot
 # infer the Debian/Ubuntu multiarch libdir; without this, find_library never
-# looks in /usr/lib/x86_64-linux-gnu (where libX11 & friends live).
-set(CMAKE_LIBRARY_ARCHITECTURE x86_64-linux-gnu)
+# looks in /usr/lib/<multiarch> (where libX11 & friends live).
+set(CMAKE_LIBRARY_ARCHITECTURE ${_zig_multiarch})
 
 # zig cc enables UBSan in trap mode by default. Ports are third-party code we
 # don't sanitize (e.g. raylib's GetCurrentMonitor overflows int on WSLg's huge
