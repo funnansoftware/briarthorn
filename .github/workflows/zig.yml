@@ -68,21 +68,18 @@ jobs:
 
       - uses: ./.github/actions/get-vcpkg
 
-      # The emsdk submodule ships only the installer; bootstrap the toolchain
-      # into the git-ignored per-host prefix the wasm build reads from. The
-      # cache key tracks the submodule's pinned release list (what "latest"
-      # resolves to), mirroring the web (CMake) workflow.
-      - name: restore-emscripten-cache
+      # zig build bootstraps the emscripten toolchain itself (into the
+      # git-ignored per-host .emsdk prefix) on a cache miss, exactly as it does
+      # locally — unlike the CMake web build, it needs no explicit bootstrap
+      # step. This only persists .emsdk across runs to avoid re-downloading the
+      # toolchain each time; the key tracks the submodule's pinned release list
+      # (what "latest" resolves to).
+      - name: cache-emscripten
         if: matrix.emscripten
         uses: actions/cache@v4
         with:
           path: .emsdk
           key: emsdk-${{ runner.os }}-${{ hashFiles('emsdk/emscripten-releases-tags.json') }}
-
-      - name: bootstrap-emscripten
-        if: matrix.emscripten
-        shell: bash
-        run: ./scripts/bootstrap-emsdk.sh
 
       - name: zig-build
         shell: bash
