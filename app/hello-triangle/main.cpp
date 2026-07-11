@@ -4,14 +4,21 @@
 
 auto main() -> int
 {
+    constexpr int windowWidth = 800;
+    constexpr int windowHeight = 600;
+
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(800, 600, "Hello, Triangle");
+    InitWindow(windowWidth, windowHeight, "Hello, Triangle");
+
+    constexpr Vector2 topVertex{.x = 400, .y = 100};
+    constexpr Vector2 leftVertex{.x = 300, .y = 300};
+    constexpr Vector2 rightVertex{.x = 500, .y = 300};
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(GRAY);
-        DrawTriangle(Vector2{400, 100}, Vector2{300, 300}, Vector2{500, 300}, ORANGE);
+        DrawTriangle(topVertex, leftVertex, rightVertex, ORANGE);
         EndDrawing();
         PollInputEvents();
         SwapScreenBuffer();
