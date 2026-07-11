@@ -6,6 +6,7 @@
 [![coverage](https://github.com/funnansoftware/briarthorn/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/coverage.yml)
 [![web](https://github.com/funnansoftware/briarthorn/actions/workflows/web.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/web.yml)
 [![android](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml)
+[![zig](https://github.com/funnansoftware/briarthorn/actions/workflows/zig.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/zig.yml)
 
 A cross-platform C++23 [raylib](https://www.raylib.com/) application for
 **Windows, Linux, macOS, Android, and the web (WebAssembly)**, with dependencies
@@ -57,6 +58,7 @@ zig build run
 ```
 
 vcpkg bootstraps itself on the first build. Add `-Doptimize=Debug` for a debug build.
+Run the GoogleTest suite (desktop hosts) with `zig build test`.
 
 ### With CMake presets
 

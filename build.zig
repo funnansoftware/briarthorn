@@ -4,6 +4,12 @@ const app_name = "briarthorn-app";
 const app_sources = [_][]const u8{ "src/main.cpp", "src/briarthorn/Game.cpp" };
 const cxx_flags = [_][]const u8{ "-std=c++23", "-Wall", "-Wextra", "-Werror", "-pedantic" };
 
+const test_name = "briarthorn-test";
+// The test binary recompiles the library sources (CMake links the briarthorn
+// static library into it) plus the test translation units; main.cpp is left
+// out because gtest_main supplies main().
+const test_sources = [_][]const u8{ "src/briarthorn/Game.cpp", "src/briarthorn/test/Game.test.cpp" };
+
 const Platform = enum { windows, linux, macos, android, emscripten };
 
 pub fn build(b: *std.Build) void {
@@ -85,7 +91,7 @@ pub fn build(b: *std.Build) void {
     mod.addSystemIncludePath(b.path(include_rel));
 
     switch (platform) {
-        .windows, .linux, .macos => buildDesktop(b, mod, platform, optimize, lib_rel, install_prefix),
+        .windows, .linux, .macos => buildDesktop(b, mod, platform, target, optimize, lib_rel, include_rel, install_prefix),
         .android, .emscripten => {
             // The SDK env vars (ANDROID_NDK_HOME, EMSDK) and directory scans
             // below are host observations the configure cache cannot track; a
@@ -98,6 +104,13 @@ pub fn build(b: *std.Build) void {
 
             const run_step = b.step("run", "Run the app");
             run_step.dependOn(&b.addFail("the run step is only available for desktop targets").step);
+
+            // The vcpkg manifest omits gtest for android/wasm, matching the
+            // CMake build that excludes the test target there; and a
+            // cross-compiled test binary could not run on the build host anyway.
+            const test_step = b.step("test", "Build and run the GoogleTest suite");
+            test_step.dependOn(&b.addFail("the test step is only available for desktop targets " ++
+                "(GoogleTest is not built for android/wasm)").step);
         },
     }
 }
@@ -141,9 +154,42 @@ fn buildDesktop(
     b: *std.Build,
     mod: *std.Build.Module,
     platform: Platform,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
     lib_rel: []const u8,
+    include_rel: []const u8,
     install_prefix: []const u8,
+) void {
+    linkDesktopLibraries(b, mod, platform, lib_rel);
+
+    const exe = b.addExecutable(.{
+        .name = app_name,
+        .root_module = mod,
+    });
+
+    const install_files = b.addUpdateSourceFiles();
+    installFile(b, install_files, exe.getEmittedBin(), install_prefix, "bin", exe.out_filename);
+    // No PDB exists when debug info is stripped (zig's default for ReleaseSmall).
+    if (platform == .windows and optimize != .ReleaseSmall)
+        installFile(b, install_files, exe.getEmittedPdb(), install_prefix, "bin", app_name ++ ".pdb");
+    b.getInstallStep().dependOn(&install_files.step);
+
+    const run_step = b.step("run", "Run the app");
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
+    run_cmd.addPassthruArgs();
+    run_step.dependOn(&run_cmd.step);
+
+    buildDesktopTests(b, platform, target, optimize, lib_rel, include_rel);
+}
+
+/// Links the vcpkg raylib/glfw and the platform's system libraries into `mod`.
+/// Shared by the app executable and the GoogleTest executable.
+fn linkDesktopLibraries(
+    b: *std.Build,
+    mod: *std.Build.Module,
+    platform: Platform,
+    lib_rel: []const u8,
 ) void {
     const vcpkg_lib: std.Build.Module.LinkSystemLibraryOptions = .{
         .use_pkg_config = .no,
@@ -176,24 +222,51 @@ fn buildDesktop(
         },
         else => unreachable,
     }
+}
 
-    const exe = b.addExecutable(.{
-        .name = app_name,
+/// Builds the GoogleTest executable and wires a `test` step that runs it,
+/// mirroring CMake's ctest integration. The test module recompiles the library
+/// sources and the test translation units, links the same vcpkg/platform
+/// libraries as the app, and adds vcpkg's gtest/gtest_main.
+fn buildDesktopTests(
+    b: *std.Build,
+    platform: Platform,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    lib_rel: []const u8,
+    include_rel: []const u8,
+) void {
+    const mod = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libcpp = true,
+    });
+    mod.addCSourceFiles(.{ .files = &test_sources, .flags = &cxx_flags });
+    mod.addIncludePath(b.path("src"));
+    mod.addSystemIncludePath(b.path(include_rel));
+
+    linkDesktopLibraries(b, mod, platform, lib_rel);
+
+    // vcpkg stages gtest_main under manual-link/ so it is linked only on
+    // request; add that directory before linking it.
+    const vcpkg_lib: std.Build.Module.LinkSystemLibraryOptions = .{
+        .use_pkg_config = .no,
+        .preferred_link_mode = .static,
+    };
+    mod.addLibraryPath(b.path(b.fmt("{s}/manual-link", .{lib_rel})));
+    // gtest_main before gtest for single-pass left-to-right resolution: its
+    // main() calls into gtest.
+    mod.linkSystemLibrary("gtest_main", vcpkg_lib);
+    mod.linkSystemLibrary("gtest", vcpkg_lib);
+
+    const test_exe = b.addExecutable(.{
+        .name = test_name,
         .root_module = mod,
     });
 
-    const install_files = b.addUpdateSourceFiles();
-    installFile(b, install_files, exe.getEmittedBin(), install_prefix, "bin", exe.out_filename);
-    // No PDB exists when debug info is stripped (zig's default for ReleaseSmall).
-    if (platform == .windows and optimize != .ReleaseSmall)
-        installFile(b, install_files, exe.getEmittedPdb(), install_prefix, "bin", app_name ++ ".pdb");
-    b.getInstallStep().dependOn(&install_files.step);
-
-    const run_step = b.step("run", "Run the app");
-    const run_cmd = b.addRunArtifact(exe);
-    run_cmd.step.dependOn(b.getInstallStep());
-    run_cmd.addPassthruArgs();
-    run_step.dependOn(&run_cmd.step);
+    const run_test = b.addRunArtifact(test_exe);
+    const test_step = b.step("test", "Build and run the GoogleTest suite");
+    test_step.dependOn(&run_test.step);
 }
 
 // -- Android ------------------------------------------------------------------
