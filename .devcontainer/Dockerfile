@@ -36,6 +36,8 @@ RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
 # Clang 22.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     clang-22 \
+    libclang-rt-22-dev \
+    llvm-22 \
     clang-format-22 \
     clang-tidy-22 \
     clangd-22 \
@@ -48,7 +50,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-22 100 \
     && update-alternatives --install /usr/bin/lld lld /usr/bin/lld-22 100 \
     && update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-22 100 \
-    && update-alternatives --install /usr/bin/clang-tidy-diff clang-tidy-diff /usr/bin/clang-tidy-diff-22.py 100
+    && update-alternatives --install /usr/bin/clang-tidy-diff clang-tidy-diff /usr/bin/clang-tidy-diff-22.py 100 \
+    && update-alternatives --install /usr/bin/llvm-profdata llvm-profdata /usr/bin/llvm-profdata-22 100 \
+    && update-alternatives --install /usr/bin/llvm-cov llvm-cov /usr/bin/llvm-cov-22 100
 
 # Emulator runtime dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
