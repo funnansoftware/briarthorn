@@ -5,6 +5,7 @@
         "../compiler/gcc.json",
         "../compiler/zig-linux.json",
         "../config/binaryDir.json",
+        "../config/coverage.json",
         "../config/debug.json",
         "../config/ninja.json",
         "../config/release.json",
@@ -63,6 +64,19 @@
             ]
         },
         {
+            "name": "x64-linux-clang-coverage",
+            "inherits": [
+                "config-binaryDir",
+                "config-coverage",
+                "config-debug",
+                "config-ninja",
+                "config-vcpkg",
+                "compiler-clang",
+                "host-x64-linux",
+                "target-x64-linux"
+            ]
+        },
+        {
             "name": "x64-linux-zig-debug",
             "inherits": [
                 "config-binaryDir",
@@ -103,6 +117,10 @@
             "configurePreset": "x64-linux-clang-release"
         },
         {
+            "name": "x64-linux-clang-coverage",
+            "configurePreset": "x64-linux-clang-coverage"
+        },
+        {
             "name": "x64-linux-zig-debug",
             "configurePreset": "x64-linux-zig-debug"
         },
@@ -136,6 +154,13 @@
         {
             "name": "x64-linux-clang-release",
             "configurePreset": "x64-linux-clang-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-linux-clang-coverage",
+            "configurePreset": "x64-linux-clang-coverage",
             "output": {
                 "outputOnFailure": true
             }

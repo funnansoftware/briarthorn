@@ -1,5 +1,12 @@
 # briarthorn
 
+[![windows](https://github.com/funnansoftware/briarthorn/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/windows.yml)
+[![macos](https://github.com/funnansoftware/briarthorn/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/macos.yml)
+[![linux](https://github.com/funnansoftware/briarthorn/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/linux.yml)
+[![coverage](https://github.com/funnansoftware/briarthorn/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/coverage.yml)
+[![emcc](https://github.com/funnansoftware/briarthorn/actions/workflows/emcc.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/emcc.yml)
+[![android](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml)
+
 A cross-platform C++23 [raylib](https://www.raylib.com/) project that builds
 for **Windows, Linux, macOS, Android, and the web (WebAssembly)** from a single
 `zig build`, with dependencies managed by [vcpkg](https://github.com/microsoft/vcpkg).

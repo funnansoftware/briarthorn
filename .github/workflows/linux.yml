@@ -78,10 +78,6 @@ jobs:
             test: true
           - preset: x64-linux-clang-debug
             test: true
-          # - preset: x64-linux-clang-arm64-android-release
-          #   test: false
-          - preset: x64-linux-emcc-release
-            test: false
 
     container:
       image: ${{ needs.docker.outputs.image }}
@@ -95,23 +91,6 @@ jobs:
           submodules: recursive
 
       - uses: ./.github/actions/get-vcpkg
-
-      # The emsdk submodule ships only the installer scripts; the toolchain
-      # (referenced by the emcc preset's VCPKG_CHAINLOAD_TOOLCHAIN_FILE) is
-      # bootstrapped into the git-ignored per-host prefix .emsdk/Linux. The
-      # cache key tracks the submodule's pinned release list, which determines
-      # what "latest" resolves to.
-      - name: restore-emscripten-cache
-        if: contains(matrix.preset, 'emcc')
-        uses: actions/cache@v4
-        with:
-          path: .emsdk
-          key: emsdk-${{ runner.os }}-${{ hashFiles('emsdk/emscripten-releases-tags.json') }}
-
-      - name: bootstrap-emscripten
-        if: contains(matrix.preset, 'emcc')
-        shell: bash
-        run: ./scripts/bootstrap-emsdk.sh
 
       - name: cmake-configure
         shell: bash

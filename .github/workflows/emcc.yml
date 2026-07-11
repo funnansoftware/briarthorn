@@ -1,4 +1,4 @@
-name: android
+name: emcc
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  android-build:
+  emcc-build:
     runs-on: ubuntu-24.04
     needs: docker
 
@@ -50,27 +50,29 @@ jobs:
 
       - uses: ./.github/actions/get-vcpkg
 
+      # The emsdk submodule ships only the installer scripts; the toolchain
+      # (referenced by the emcc preset's VCPKG_CHAINLOAD_TOOLCHAIN_FILE) is
+      # bootstrapped into the git-ignored per-host prefix .emsdk/Linux. The
+      # cache key tracks the submodule's pinned release list, which determines
+      # what "latest" resolves to.
+      - name: restore-emscripten-cache
+        uses: actions/cache@v4
+        with:
+          path: .emsdk
+          key: emsdk-${{ runner.os }}-${{ hashFiles('emsdk/emscripten-releases-tags.json') }}
+
+      - name: bootstrap-emscripten
+        shell: bash
+        run: ./scripts/bootstrap-emsdk.sh
+
       - name: cmake-configure
         shell: bash
-        run: cmake --preset x64-linux-android-ndk-release
+        run: cmake --preset x64-linux-emcc-release
 
       - name: cmake-build
         shell: bash
-        run: cmake --build --preset x64-linux-android-ndk-release --parallel $(( $(nproc --all) + 1 ))
+        run: cmake --build --preset x64-linux-emcc-release --parallel $(( $(nproc --all) + 1 ))
 
-      # gradle locates the SDK through android/local.properties, which is
-      # gitignored; generate it from the container's ANDROID_HOME before the
-      # apk target invokes the gradle wrapper.
-      - name: write-local-properties
+      - name: cmake-install
         shell: bash
-        run: echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
-
-      - name: build-apk
-        shell: bash
-        run: cmake --build --preset x64-linux-android-ndk-release --target apk
-
-      - name: upload-apk
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-apk
-          path: build/x64-linux-android-ndk-release/outputs/apk/release/app-release.apk
+        run: cmake --build --preset x64-linux-emcc-release --target install

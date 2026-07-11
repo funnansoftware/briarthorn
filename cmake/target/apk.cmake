@@ -9,6 +9,15 @@ if(ANDROID)
     endif()
 
     if(EXISTS "${_GRADLEW}")
+        # The checked-in wrapper may lack the executable bit on some checkouts;
+        # run it through sh on POSIX hosts (mirroring build.zig) instead of
+        # exec'ing it directly.
+        if(CMAKE_HOST_WIN32)
+            set(_GRADLE_COMMAND "${_GRADLEW}")
+        else()
+            set(_GRADLE_COMMAND sh "${_GRADLEW}")
+        endif()
+
         if(CMAKE_BUILD_TYPE STREQUAL "Release")
             set(_APK_GRADLE_TASK "assembleRelease")
             set(_APK_VARIANT "release")
@@ -25,7 +34,7 @@ if(ANDROID)
         set(_APK_OUT "${CMAKE_BINARY_DIR}/outputs/apk/${_APK_VARIANT}/${_APK_NAME}")
 
         add_custom_target(apk
-            COMMAND "${_GRADLEW}" ${_APK_GRADLE_TASK}
+            COMMAND ${_GRADLE_COMMAND} ${_APK_GRADLE_TASK}
             COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/outputs/apk/${_APK_VARIANT}"
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${_APK_GRADLE_OUT}" "${_APK_OUT}"
             WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/android"

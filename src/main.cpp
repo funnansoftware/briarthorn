@@ -1,4 +1,6 @@
 #include <cstdlib>
+#include <exception>
+#include <iostream>
 
 #include <briarthorn/Game.hpp>
 
@@ -12,7 +14,13 @@ try
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception &error)
+{
+    std::cerr << "briarthorn: " << error.what() << '\n';
+    return EXIT_FAILURE;
+}
 catch (...)
 {
+    std::cerr << "briarthorn: unknown error\n";
     return EXIT_FAILURE;
 }

@@ -33,6 +33,7 @@ namespace briarthorn
         [[nodiscard]] auto triangle() const -> Triangle;
 
         // Opens the window and drives the render loop until it is closed.
+        // Throws std::runtime_error if the window cannot be created.
         auto run() const -> void;
 
     private:

@@ -1,5 +1,6 @@
 #include "Game.hpp"
 
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -46,6 +47,11 @@ namespace briarthorn
     {
         SetConfigFlags(FLAG_WINDOW_RESIZABLE);
         InitWindow(size_.width, size_.height, title_.c_str());
+
+        if (!IsWindowReady())
+        {
+            throw std::runtime_error{"failed to create window"};
+        }
 
         const Triangle shape = triangle();
 

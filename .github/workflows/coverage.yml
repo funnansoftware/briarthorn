@@ -1,4 +1,4 @@
-name: android
+name: coverage
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  android-build:
+  coverage:
     runs-on: ubuntu-24.04
     needs: docker
 
@@ -52,25 +52,24 @@ jobs:
 
       - name: cmake-configure
         shell: bash
-        run: cmake --preset x64-linux-android-ndk-release
+        run: cmake --preset x64-linux-clang-coverage
 
       - name: cmake-build
         shell: bash
-        run: cmake --build --preset x64-linux-android-ndk-release --parallel $(( $(nproc --all) + 1 ))
+        run: cmake --build --preset x64-linux-clang-coverage --parallel $(( $(nproc --all) + 1 ))
 
-      # gradle locates the SDK through android/local.properties, which is
-      # gitignored; generate it from the container's ANDROID_HOME before the
-      # apk target invokes the gradle wrapper.
-      - name: write-local-properties
+      - name: cmake-test
         shell: bash
-        run: echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
+        run: ctest --preset x64-linux-clang-coverage --parallel $(( $(nproc --all) + 1 ))
 
-      - name: build-apk
+      - name: llvm-coverage
         shell: bash
-        run: cmake --build --preset x64-linux-android-ndk-release --target apk
+        run: cmake --build --preset x64-linux-clang-coverage --target llvm-coverage
 
-      - name: upload-apk
+      - name: upload-coverage-report
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/x64-linux-android-ndk-release/outputs/apk/release/app-release.apk
+          name: coverage-report
+          path: |
+            build/x64-linux-clang-coverage/coverage/html
+            build/x64-linux-clang-coverage/coverage/coverage.info
