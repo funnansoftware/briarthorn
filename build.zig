@@ -761,7 +761,7 @@ fn hashToolchainInputs(b: *std.Build, hasher: *std.crypto.hash.sha2.Sha256) void
     const io = b.graph.io;
     const cwd = std.Io.Dir.cwd();
     const root = rootPath(b);
-    const dirs = [_][]const u8{ "cmake/triplets", "cmake/toolchain", "cmake/compiler" };
+    const dirs = [_][]const u8{ "cmake/triplets", "cmake/toolchain", "cmake/preset/compiler" };
     for (dirs) |rel_dir| {
         var dir = cwd.openDir(io, b.pathJoin(&.{ root, rel_dir }), .{ .iterate = true }) catch continue;
         defer dir.close(io);

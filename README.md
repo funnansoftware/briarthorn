@@ -130,7 +130,7 @@ Notes:
   `build/<target>-<optimize>/` directory is safe — the next build reinstalls
   everything (usually restored from vcpkg's binary cache in seconds).
 - Editing `vcpkg.json`, `vcpkg-configuration.json`, or anything under
-  `cmake/triplets`, `cmake/toolchain`, or `cmake/compiler` automatically
+  `cmake/triplets`, `cmake/toolchain`, or `cmake/preset/compiler` automatically
   re-runs the vcpkg install on the next build.
 
 ## Building with CMake presets

@@ -7,6 +7,9 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 project(briarthorn)
 
+include(cmake/target/clang-format.cmake)
+include(cmake/target/clang-tidy.cmake)
+
 include(cmake/build-apk.cmake)
 
 add_subdirectory(app)
