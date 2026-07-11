@@ -3,7 +3,7 @@
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
-get_filename_component(_zig_compiler_dir "${CMAKE_CURRENT_LIST_DIR}/../compiler" ABSOLUTE)
+get_filename_component(_zig_compiler_dir "${CMAKE_CURRENT_LIST_DIR}/../preset/compiler" ABSOLUTE)
 
 # The wrappers come in pairs; pick by the machine running the build so the
 # windows ports can also be cross-built from a linux host.
