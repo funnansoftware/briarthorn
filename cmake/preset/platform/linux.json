@@ -15,6 +15,13 @@
     ],
     "configurePresets": [
         {
+            "name": "linux",
+            "displayName": "linux (release build, GCC)",
+            "inherits": [
+                "linux-gcc-release"
+            ]
+        },
+        {
             "name": "linux-gcc-debug",
             "inherits": [
                 "config-binaryDir",
@@ -92,6 +99,10 @@
         }
     ],
     "buildPresets": [
+        {
+            "name": "linux",
+            "configurePreset": "linux"
+        },
         {
             "name": "linux-gcc-debug",
             "configurePreset": "linux-gcc-debug"

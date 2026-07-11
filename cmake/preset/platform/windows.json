@@ -13,6 +13,13 @@
     ],
     "configurePresets": [
         {
+            "name": "windows",
+            "displayName": "windows (release build, MSVC)",
+            "inherits": [
+                "windows-msvc-release"
+            ]
+        },
+        {
             "name": "windows-msvc-debug",
             "inherits": [
                 "compiler-msvc",
@@ -58,6 +65,10 @@
         }
     ],
     "buildPresets": [
+        {
+            "name": "windows",
+            "configurePreset": "windows"
+        },
         {
             "name": "windows-msvc-debug",
             "configurePreset": "windows-msvc-debug"

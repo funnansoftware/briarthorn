@@ -12,6 +12,13 @@
     ],
     "configurePresets": [
         {
+            "name": "macos",
+            "displayName": "macos (release build, Clang)",
+            "inherits": [
+                "macos-clang-release"
+            ]
+        },
+        {
             "name": "macos-clang-debug",
             "inherits": [
                 "compiler-homebrew-clang",
@@ -47,6 +54,10 @@
         }
     ],
     "buildPresets": [
+        {
+            "name": "macos",
+            "configurePreset": "macos"
+        },
         {
             "name": "macos-clang-debug",
             "configurePreset": "macos-clang-debug"

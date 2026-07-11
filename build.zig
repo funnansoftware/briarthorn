@@ -8,7 +8,14 @@ const Platform = enum { windows, linux, macos, android, emscripten };
 
 pub fn build(b: *std.Build) void {
     var target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+    // Default to an optimized release build so a plain `zig build` / `zig build
+    // run` just works for someone who only wants to play; developers can still
+    // pass -Doptimize=Debug (or ReleaseSafe/ReleaseSmall).
+    const optimize = b.option(
+        std.builtin.OptimizeMode,
+        "optimize",
+        "optimization mode (default ReleaseFast)",
+    ) orelse .ReleaseFast;
 
     const platform = classify(target.result);
 
