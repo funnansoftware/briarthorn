@@ -4,36 +4,63 @@
 [![macos](https://github.com/funnansoftware/briarthorn/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/macos.yml)
 [![linux](https://github.com/funnansoftware/briarthorn/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/linux.yml)
 [![coverage](https://github.com/funnansoftware/briarthorn/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/coverage.yml)
-[![emcc](https://github.com/funnansoftware/briarthorn/actions/workflows/emcc.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/emcc.yml)
+[![web](https://github.com/funnansoftware/briarthorn/actions/workflows/web.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/web.yml)
 [![android](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml)
 
-A cross-platform C++23 [raylib](https://www.raylib.com/) project that builds
-for **Windows, Linux, macOS, Android, and the web (WebAssembly)** from a single
-`zig build`, with dependencies managed by [vcpkg](https://github.com/microsoft/vcpkg).
-A parallel [CMake presets](#building-with-cmake-presets) flow covers
-platform-native toolchains (MSVC, GCC, Clang, NDK, Emscripten).
+A cross-platform C++23 [raylib](https://www.raylib.com/) application that runs on
+**Windows, Linux, macOS, Android, and the web (WebAssembly)**, with dependencies
+managed by [vcpkg](https://github.com/microsoft/vcpkg).
+
+There are two ways to build it — you only need the tools for the one you use:
+
+- **[`zig build`](#building-with-zig)** — the simplest path: one command builds
+  any target, and vcpkg bootstraps itself on the first run.
+- **[CMake presets](#building-with-cmake-presets)** — builds with your
+  platform's native toolchain (Visual Studio, GCC, Clang, the Android NDK,
+  Emscripten), or with zig used as the compiler.
 
 ## Prerequisites
 
-Everything needs:
+### Everyone needs
 
 - [git](https://git-scm.com/)
-- [zig](https://ziglang.org/download/) — a master (nightly) build; the pinned
-  version is in [.zigversion](.zigversion)
+- The system libraries raylib and its windowing layer (GLFW) are compiled
+  against — vcpkg builds them from source, so these must be present first:
 
-Per platform:
+  | OS | Install |
+  | --- | --- |
+  | Linux | `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config` |
+  | macOS | Xcode Command Line Tools: `xcode-select --install` |
+  | Windows | nothing extra — the Windows SDK that ships with Visual Studio covers it |
+
+### To build with zig
+
+- [zig](https://ziglang.org/download/) — a master (nightly) build; the exact
+  pinned version is in [.zigversion](.zigversion)
+
+### To build with CMake presets
+
+- [CMake](https://cmake.org/download/) and [Ninja](https://github.com/ninja-build/ninja/releases)
+- a compiler for the preset you pick — everything targets 64-bit:
+
+  | Preset family | Compiler to install |
+  | --- | --- |
+  | `linux-gcc-*` | GCC (`g++`), recent enough for C++23 — the devcontainer uses GCC 15 |
+  | `linux-clang-*` | Clang (`clang++`), recent enough for C++23 — the devcontainer uses Clang 22 |
+  | `windows-msvc-*` | [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) with the "Desktop development with C++" workload |
+  | `macos-clang-*` | Homebrew LLVM/Clang, pinned to version 21: `brew install llvm@21` |
+  | `*-zig-*` | [zig](https://ziglang.org/download/) — used as the C/C++ compiler (targets MinGW on Windows) |
+
+### For web or Android targets (either build path)
 
 | Target | Extra requirements |
 | --- | --- |
-| Windows | none — vcpkg bootstraps itself on first build |
-| Linux | X11 development headers: `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config` |
-| macOS | Xcode Command Line Tools (`xcode-select --install`) |
-| Android | an [Android NDK](https://developer.android.com/ndk) (`ANDROID_NDK_HOME` pointing at it); for APK packaging also an Android SDK (`ANDROID_HOME`) and a JDK |
-| Web | none — the first web build bootstraps emscripten from the emsdk submodule into the per-host prefix `.emsdk/<host>` (one-time toolchain download, ~1.5 GB). Installs are keyed by host OS so one working tree can be shared across operating systems (WSL, devcontainers) without the toolchains clobbering each other. Set `EMSDK`/`EMSCRIPTEN_ROOT` or put `emcc` on `PATH` to use your own emsdk instead |
+| Web | none — the first web build downloads and installs emscripten from the [emsdk](emsdk/) submodule (one-time, ~1.5 GB) into the git-ignored, per-host prefix `.emsdk/<host>`. Set `EMSDK`/`EMSCRIPTEN_ROOT`, or put `emcc` on `PATH`, to use your own install instead |
+| Android | an [Android NDK](https://developer.android.com/ndk) (point `ANDROID_NDK_HOME` at it); for APK packaging also an Android SDK (`ANDROID_HOME`) and a JDK |
 
-The [devcontainer](.devcontainer) ships all of the above for Linux hosts
-(GCC 15, Clang 22, zig, NDK, Android SDK + emulator), so Linux, Android, and
-web builds work in it out of the box.
+The [devcontainer](.devcontainer) ships all of the above for Linux hosts (git,
+CMake, Ninja, GCC 15, Clang 22, zig, the Android NDK, Android SDK + emulator,
+and a JDK), so Linux, Android, and web builds work in it out of the box.
 
 ## Cloning
 
@@ -146,19 +173,22 @@ The CMake flow uses the same vcpkg manifest with platform-native toolchains.
 Configure and build with a preset name:
 
 ```sh
-cmake --preset x64-linux-clang-debug
-cmake --build --preset x64-linux-clang-debug
+cmake --preset linux-clang-debug
+cmake --build --preset linux-clang-debug
 ```
 
 Available presets (each in `-debug` and `-release` variants):
 
 | Host | Presets |
 | --- | --- |
-| Windows | `x64-windows-msvc-*` (Visual Studio), `x64-windows-zig-*` (zig as compiler) |
-| Linux | `x64-linux-gcc-*`, `x64-linux-clang-*`, `x64-linux-zig-*` |
-| macOS | `arm64-macos-clang-*` (Homebrew clang) |
-| Linux → Android | `x64-linux-android-ndk-*` |
-| Linux → Web | `x64-linux-emcc-*` (uses the per-host emscripten install in `.emsdk/`; bootstrap it once with `./scripts/bootstrap-emsdk.sh`, or run any zig web build first) |
+| Windows | `windows-msvc-*` (Visual Studio), `windows-zig-*` (zig as compiler) |
+| Linux | `linux-gcc-*`, `linux-clang-*`, `linux-zig-*` |
+| macOS | `macos-clang-*` (Homebrew LLVM) |
+| Linux → Android | `android-*` |
+| Linux → Web | `web-*` (uses the per-host emscripten install in `.emsdk/`; bootstrap it once with `./scripts/bootstrap-emsdk.sh`, or run any zig web build first) |
+
+`linux-clang` and `macos-clang` also have a `-coverage` variant that builds an
+instrumented binary and reports coverage (`--target llvm-coverage`).
 
 Build output goes to `build/<preset>/`; `cmake --install build/<preset>`
 places binaries under `build/<preset>/installed/`. If `vcpkg/vcpkg` (or
@@ -167,13 +197,15 @@ the `.bat`) once first.
 
 ### Android APK
 
-The Android presets add gradle-driven APK targets:
+The Android presets add a gradle-driven `apk` target (the debug/release variant
+follows the preset's build type):
 
 ```sh
-cmake --build --preset x64-linux-android-ndk-debug --target apk-debug
+cmake --build --preset android-debug --target apk
 ```
 
-APKs are copied to `build/<preset>/installed/android/`.
+The APK is copied into the build tree at
+`build/<preset>/outputs/apk/<variant>/app-<variant>.apk`.
 
 ## License
 

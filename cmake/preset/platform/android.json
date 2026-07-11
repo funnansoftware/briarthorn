@@ -7,56 +7,53 @@
         "../config/ninja.json",
         "../config/release.json",
         "../config/vcpkg.json",
-        "../host/x64-linux.json",
-        "../target/arm64-android.json"
+        "../target/android.json"
     ],
     "configurePresets": [
         {
-            "name": "x64-linux-android-ndk-debug",
+            "name": "android-debug",
             "inherits": [
                 "config-binaryDir",
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
                 "compiler-android-ndk",
-                "host-x64-linux",
-                "target-arm64-android"
+                "target-android"
             ]
         },
         {
-            "name": "x64-linux-android-ndk-release",
+            "name": "android-release",
             "inherits": [
                 "config-binaryDir",
                 "config-release",
                 "config-ninja",
                 "config-vcpkg",
                 "compiler-android-ndk",
-                "host-x64-linux",
-                "target-arm64-android"
+                "target-android"
             ]
         }
     ],
     "buildPresets": [
         {
-            "name": "x64-linux-android-ndk-debug",
-            "configurePreset": "x64-linux-android-ndk-debug"
+            "name": "android-debug",
+            "configurePreset": "android-debug"
         },
         {
-            "name": "x64-linux-android-ndk-release",
-            "configurePreset": "x64-linux-android-ndk-release"
+            "name": "android-release",
+            "configurePreset": "android-release"
         }
     ],
     "testPresets": [
         {
-            "name": "x64-linux-android-ndk-debug",
-            "configurePreset": "x64-linux-android-ndk-debug",
+            "name": "android-debug",
+            "configurePreset": "android-debug",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "x64-linux-android-ndk-release",
-            "configurePreset": "x64-linux-android-ndk-release",
+            "name": "android-release",
+            "configurePreset": "android-release",
             "output": {
                 "outputOnFailure": true
             }

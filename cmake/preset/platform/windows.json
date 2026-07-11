@@ -8,103 +8,98 @@
         "../config/ninja.json",
         "../config/release.json",
         "../config/vcpkg.json",
-        "../host/x64-windows.json",
-        "../target/x64-windows.json",
-        "../target/x64-windows-zig.json"
+        "../target/windows.json",
+        "../target/windows-zig.json"
     ],
     "configurePresets": [
         {
-            "name": "x64-windows-msvc-debug",
+            "name": "windows-msvc-debug",
             "inherits": [
                 "compiler-msvc",
                 "config-binaryDir",
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
-                "host-x64-windows",
-                "target-x64-windows"
+                "target-windows"
             ]
         },
         {
-            "name": "x64-windows-msvc-release",
+            "name": "windows-msvc-release",
             "inherits": [
                 "compiler-msvc",
                 "config-binaryDir",
                 "config-ninja",
                 "config-release",
                 "config-vcpkg",
-                "host-x64-windows",
-                "target-x64-windows"
+                "target-windows"
             ]
         },
         {
-            "name": "x64-windows-zig-debug",
+            "name": "windows-zig-debug",
             "inherits": [
                 "compiler-zig-windows",
                 "config-binaryDir",
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
-                "host-x64-windows",
-                "target-x64-windows-zig"
+                "target-windows-zig"
             ]
         },
         {
-            "name": "x64-windows-zig-release",
+            "name": "windows-zig-release",
             "inherits": [
                 "compiler-zig-windows",
                 "config-binaryDir",
                 "config-ninja",
                 "config-release",
                 "config-vcpkg",
-                "host-x64-windows",
-                "target-x64-windows-zig"
+                "target-windows-zig"
             ]
         }
     ],
     "buildPresets": [
         {
-            "name": "x64-windows-msvc-debug",
-            "configurePreset": "x64-windows-msvc-debug"
+            "name": "windows-msvc-debug",
+            "configurePreset": "windows-msvc-debug"
         },
         {
-            "name": "x64-windows-msvc-release",
-            "configurePreset": "x64-windows-msvc-release"
+            "name": "windows-msvc-release",
+            "configurePreset": "windows-msvc-release"
         },
         {
-            "name": "x64-windows-zig-debug",
-            "configurePreset": "x64-windows-zig-debug"
+            "name": "windows-zig-debug",
+            "configurePreset": "windows-zig-debug"
         },
         {
-            "name": "x64-windows-zig-release",
-            "configurePreset": "x64-windows-zig-release"
+            "name": "windows-zig-release",
+            "configurePreset": "windows-zig-release"
         }
     ],
     "testPresets": [
         {
-            "name": "x64-windows-msvc-debug",
-            "configurePreset": "x64-windows-msvc-debug",
+            "name": "windows-msvc-debug",
+            "configurePreset": "windows-msvc-debug",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "x64-windows-msvc-release",
-            "configurePreset": "x64-windows-msvc-release",
+            "name": "windows-msvc-release",
+            "configurePreset": "windows-msvc-release",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "x64-windows-zig-debug",
-            "configurePreset": "x64-windows-zig-debug",
+            "name": "windows-zig-debug",
+            "configurePreset": "windows-zig-debug",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "x64-windows-zig-release",
-            "configurePreset": "x64-windows-zig-release",
+            "name": "windows-zig-release",
+            "configurePreset": "windows-zig-release",
             "output": {
                 "outputOnFailure": true
             }

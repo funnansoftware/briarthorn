@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - preset: arm64-macos-clang-release
+          - preset: macos-clang-release
             target: install
 
     steps:

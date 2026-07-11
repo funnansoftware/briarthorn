@@ -7,56 +7,53 @@
         "../config/ninja.json",
         "../config/release.json",
         "../config/vcpkg.json",
-        "../host/x64-linux.json",
-        "../target/wasm32-emscripten.json"
+        "../target/web.json"
     ],
     "configurePresets": [
         {
-            "name": "x64-linux-emcc-debug",
+            "name": "web-debug",
             "inherits": [
                 "config-binaryDir",
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
                 "compiler-emcc",
-                "host-x64-linux",
-                "target-wasm32-emscripten"
+                "target-web"
             ]
         },
         {
-            "name": "x64-linux-emcc-release",
+            "name": "web-release",
             "inherits": [
                 "config-binaryDir",
                 "config-release",
                 "config-ninja",
                 "config-vcpkg",
                 "compiler-emcc",
-                "host-x64-linux",
-                "target-wasm32-emscripten"
+                "target-web"
             ]
         }
     ],
     "buildPresets": [
         {
-            "name": "x64-linux-emcc-debug",
-            "configurePreset": "x64-linux-emcc-debug"
+            "name": "web-debug",
+            "configurePreset": "web-debug"
         },
         {
-            "name": "x64-linux-emcc-release",
-            "configurePreset": "x64-linux-emcc-release"
+            "name": "web-release",
+            "configurePreset": "web-release"
         }
     ],
     "testPresets": [
         {
-            "name": "x64-linux-emcc-debug",
-            "configurePreset": "x64-linux-emcc-debug",
+            "name": "web-debug",
+            "configurePreset": "web-debug",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "x64-linux-emcc-release",
-            "configurePreset": "x64-linux-emcc-release",
+            "name": "web-release",
+            "configurePreset": "web-release",
             "output": {
                 "outputOnFailure": true
             }

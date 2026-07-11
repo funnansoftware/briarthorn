@@ -8,24 +8,22 @@
         "../config/ninja.json",
         "../config/release.json",
         "../config/vcpkg.json",
-        "../host/arm64-macos.json",
-        "../target/arm64-macos.json"
+        "../target/macos.json"
     ],
     "configurePresets": [
         {
-            "name": "arm64-macos-clang-debug",
+            "name": "macos-clang-debug",
             "inherits": [
                 "compiler-homebrew-clang",
                 "config-binaryDir",
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
-                "host-arm64-macos",
-                "target-arm64-macos"
+                "target-macos"
             ]
         },
         {
-            "name": "arm64-macos-clang-coverage",
+            "name": "macos-clang-coverage",
             "inherits": [
                 "compiler-homebrew-clang",
                 "config-binaryDir",
@@ -33,55 +31,53 @@
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
-                "host-arm64-macos",
-                "target-arm64-macos"
+                "target-macos"
             ]
         },
         {
-            "name": "arm64-macos-clang-release",
+            "name": "macos-clang-release",
             "inherits": [
                 "compiler-homebrew-clang",
                 "config-binaryDir",
                 "config-ninja",
                 "config-release",
                 "config-vcpkg",
-                "host-arm64-macos",
-                "target-arm64-macos"
+                "target-macos"
             ]
         }
     ],
     "buildPresets": [
         {
-            "name": "arm64-macos-clang-debug",
-            "configurePreset": "arm64-macos-clang-debug"
+            "name": "macos-clang-debug",
+            "configurePreset": "macos-clang-debug"
         },
         {
-            "name": "arm64-macos-clang-coverage",
-            "configurePreset": "arm64-macos-clang-coverage"
+            "name": "macos-clang-coverage",
+            "configurePreset": "macos-clang-coverage"
         },
         {
-            "name": "arm64-macos-clang-release",
-            "configurePreset": "arm64-macos-clang-release"
+            "name": "macos-clang-release",
+            "configurePreset": "macos-clang-release"
         }
     ],
     "testPresets": [
         {
-            "name": "arm64-macos-clang-debug",
-            "configurePreset": "arm64-macos-clang-debug",
+            "name": "macos-clang-debug",
+            "configurePreset": "macos-clang-debug",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "arm64-macos-clang-coverage",
-            "configurePreset": "arm64-macos-clang-coverage",
+            "name": "macos-clang-coverage",
+            "configurePreset": "macos-clang-coverage",
             "output": {
                 "outputOnFailure": true
             }
         },
         {
-            "name": "arm64-macos-clang-release",
-            "configurePreset": "arm64-macos-clang-release",
+            "name": "macos-clang-release",
+            "configurePreset": "macos-clang-release",
             "output": {
                 "outputOnFailure": true
             }

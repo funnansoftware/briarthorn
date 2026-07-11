@@ -52,24 +52,24 @@ jobs:
 
       - name: cmake-configure
         shell: bash
-        run: cmake --preset x64-linux-clang-coverage
+        run: cmake --preset linux-clang-coverage
 
       - name: cmake-build
         shell: bash
-        run: cmake --build --preset x64-linux-clang-coverage --parallel $(( $(nproc --all) + 1 ))
+        run: cmake --build --preset linux-clang-coverage --parallel $(( $(nproc --all) + 1 ))
 
       - name: cmake-test
         shell: bash
-        run: ctest --preset x64-linux-clang-coverage --parallel $(( $(nproc --all) + 1 ))
+        run: ctest --preset linux-clang-coverage --parallel $(( $(nproc --all) + 1 ))
 
       - name: llvm-coverage
         shell: bash
-        run: cmake --build --preset x64-linux-clang-coverage --target llvm-coverage
+        run: cmake --build --preset linux-clang-coverage --target llvm-coverage
 
       - name: upload-coverage-report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: |
-            build/x64-linux-clang-coverage/coverage/html
-            build/x64-linux-clang-coverage/coverage/coverage.info
+            build/linux-clang-coverage/coverage/html
+            build/linux-clang-coverage/coverage/coverage.info
