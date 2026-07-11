@@ -475,8 +475,12 @@ fn findEmscriptenRoot(b: *std.Build) ?EmscriptenRoot {
 
 /// Resolves an emscripten installation, verifying emcc is actually present so
 /// a broken setup fails fast instead of deep inside vcpkg. When no environment
-/// override is set, falls back to the emsdk submodule, bootstrapping it on
-/// first use (like the vcpkg submodule).
+/// override is set, falls back to a per-host prefix under .emsdk/,
+/// bootstrapping it from the emsdk submodule on first use (like the vcpkg
+/// submodule). Installs are keyed by host OS because the toolchain binaries
+/// are platform-specific: one working tree may be shared across operating
+/// systems (WSL, devcontainers), and a single shared install would be
+/// clobbered on every switch.
 fn resolveEmscriptenRoot(b: *std.Build) []const u8 {
     const io = b.graph.io;
     const cwd = std.Io.Dir.cwd();
@@ -491,19 +495,51 @@ fn resolveEmscriptenRoot(b: *std.Build) []const u8 {
 
     const root = rootPath(b);
     const host_is_windows = b.graph.host.result.os.tag == .windows;
+    // Spelled like CMake's ${hostSystemName} so the CMake presets address the
+    // same directory without a mapping layer.
+    const host_key: []const u8 = switch (b.graph.host.result.os.tag) {
+        .windows => "Windows",
+        .macos => "Darwin",
+        else => "Linux",
+    };
+    const install_dir = b.pathJoin(&.{ root, ".emsdk", host_key });
+    const em_root = b.pathJoin(&.{ install_dir, "upstream", "emscripten" });
+    // Require the activate-written config too, so an interrupted bootstrap
+    // (installed but never activated) is retried instead of trusted.
+    if (cwd.access(io, emccExecutable(b, em_root), .{})) |_| {
+        if (cwd.access(io, b.pathJoin(&.{ install_dir, ".emscripten" }), .{})) |_| return em_root else |_| {}
+    } else |_| {}
+
     const emsdk_dir = b.pathJoin(&.{ root, "emsdk" });
-    const emsdk_script = b.pathJoin(&.{ emsdk_dir, if (host_is_windows) "emsdk.bat" else "emsdk" });
-    if (cwd.access(io, emsdk_script, .{})) |_| {} else |_| std.process.fatal("emscripten not found: initialize the emsdk submodule " ++
+    const script_name = if (host_is_windows) "emsdk.bat" else "emsdk";
+    if (cwd.access(io, b.pathJoin(&.{ emsdk_dir, script_name }), .{})) |_| {} else |_| std.process.fatal("emscripten not found: initialize the emsdk submodule " ++
         "(git submodule update --init), or set EMSDK/EMSCRIPTEN_ROOT, or put emcc on PATH", .{});
 
-    const em_root = b.pathJoin(&.{ emsdk_dir, "upstream", "emscripten" });
-    if (cwd.access(io, emccExecutable(b, em_root), .{})) |_| return em_root else |_| {}
-
-    // We are about to mutate the emsdk checkout; never cache this configure run.
+    // We are about to mutate the install prefix; never cache this configure run.
     b.graph.poisonCache();
+    std.debug.print("bootstrapping emscripten into {s} (one-time toolchain download)...\n", .{install_dir});
+
+    // emsdk installs into whatever directory its scripts run from, so copy
+    // the installer files out of the (pristine) submodule into the per-host
+    // prefix and run them there. scripts/bootstrap-emsdk.sh mirrors this.
+    cwd.createDirPath(io, install_dir) catch |err|
+        std.process.fatal("unable to create {s}: {s}", .{ install_dir, @errorName(err) });
+    var src_dir = cwd.openDir(io, emsdk_dir, .{ .iterate = true }) catch |err|
+        std.process.fatal("unable to open {s}: {s}", .{ emsdk_dir, @errorName(err) });
+    defer src_dir.close(io);
+    var dst_dir = cwd.openDir(io, install_dir, .{}) catch |err|
+        std.process.fatal("unable to open {s}: {s}", .{ install_dir, @errorName(err) });
+    defer dst_dir.close(io);
+    var it = src_dir.iterate();
+    while (it.next(io) catch null) |entry| {
+        if (entry.kind != .file) continue;
+        std.Io.Dir.copyFile(src_dir, entry.name, dst_dir, entry.name, io, .{}) catch |err|
+            std.process.fatal("unable to copy emsdk installer file {s}: {s}", .{ entry.name, @errorName(err) });
+    }
+
     // "latest" resolves against the release list checked into the pinned
     // submodule commit, so the submodule pin determines the toolchain version.
-    std.debug.print("bootstrapping the emsdk submodule (one-time emscripten toolchain download)...\n", .{});
+    const emsdk_script = b.pathJoin(&.{ install_dir, script_name });
     if (host_is_windows) {
         runChecked(b, &.{ emsdk_script, "install", "latest" }, root, null);
         runChecked(b, &.{ emsdk_script, "activate", "latest" }, root, null);
@@ -674,7 +710,7 @@ fn ensureVcpkgInstalled(
         .emscripten => {
             // vcpkg's wasm32-emscripten triplet locates the toolchain through
             // this env var; point it at whichever emscripten was resolved
-            // (possibly the just-bootstrapped emsdk submodule).
+            // (possibly the just-bootstrapped per-host prefix under .emsdk/).
             const em_root = resolveEmscriptenRoot(b);
             vcpkg_env.put("EMSCRIPTEN_ROOT", em_root) catch @panic("OOM");
         },

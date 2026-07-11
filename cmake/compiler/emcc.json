@@ -5,7 +5,7 @@
             "name": "compiler-emcc",
             "hidden": true,
             "environment": {
-                "EMSDK": "${sourceDir}/emsdk"
+                "EMSDK": "${sourceDir}/.emsdk/${hostSystemName}"
             },
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": true,

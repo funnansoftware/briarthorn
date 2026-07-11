@@ -22,7 +22,7 @@ Per platform:
 | Linux | X11 development headers: `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config` |
 | macOS | Xcode Command Line Tools (`xcode-select --install`) |
 | Android | an [Android NDK](https://developer.android.com/ndk) (`ANDROID_NDK_HOME` pointing at it); for APK packaging also an Android SDK (`ANDROID_HOME`) and a JDK |
-| Web | none — the emsdk submodule bootstraps automatically on the first web build (one-time toolchain download, ~1.5 GB). Set `EMSDK`/`EMSCRIPTEN_ROOT` or put `emcc` on `PATH` to use your own emsdk instead |
+| Web | none — the first web build bootstraps emscripten from the emsdk submodule into the per-host prefix `.emsdk/<host>` (one-time toolchain download, ~1.5 GB). Installs are keyed by host OS so one working tree can be shared across operating systems (WSL, devcontainers) without the toolchains clobbering each other. Set `EMSDK`/`EMSCRIPTEN_ROOT` or put `emcc` on `PATH` to use your own emsdk instead |
 
 The [devcontainer](.devcontainer) ships all of the above for Linux hosts
 (GCC 15, Clang 22, zig, NDK, Android SDK + emulator), so Linux, Android, and
@@ -103,9 +103,10 @@ Install it on a device or emulator with
 zig build -Dtarget=wasm32-emscripten
 ```
 
-The first web build bootstraps the [emsdk](emsdk/) submodule (install +
-activate, pinned by the submodule commit; the downloaded toolchain lives
-gitignored inside the submodule). Produces
+The first web build bootstraps emscripten from the [emsdk](emsdk/) submodule
+(install + activate, pinned by the submodule commit; the downloaded toolchain
+lives gitignored in `.emsdk/<host>`, keyed by host OS so a tree shared across
+operating systems keeps one install per platform). Produces
 `build/wasm32-emscripten-<optimize>/installed/web/hello-triangle.{html,js,wasm}`.
 Browsers won't load wasm from `file://`, so serve the directory:
 
@@ -150,7 +151,7 @@ Available presets (each in `-debug` and `-release` variants):
 | Linux | `x64-linux-gcc-*`, `x64-linux-clang-*`, `x64-linux-zig-*` |
 | macOS | `arm64-macos-clang-*` (Homebrew clang) |
 | Linux → Android | `x64-linux-android-ndk-*` |
-| Linux → Web | `x64-linux-emcc-*` (uses the emsdk submodule; bootstrap it once with `./emsdk/emsdk install latest && ./emsdk/emsdk activate latest`, or run any zig web build first) |
+| Linux → Web | `x64-linux-emcc-*` (uses the per-host emscripten install in `.emsdk/`; bootstrap it once with `./scripts/bootstrap-emsdk.sh`, or run any zig web build first) |
 
 Build output goes to `build/<preset>/`; `cmake --install build/<preset>`
 places binaries under `build/<preset>/installed/`. If `vcpkg/vcpkg` (or

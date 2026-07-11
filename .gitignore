@@ -61,6 +61,9 @@ compile_commands.json
 # vcpkg
 vcpkg_installed/
 
+# emscripten per-host toolchain installs (see scripts/bootstrap-emsdk.sh)
+.emsdk/
+
 # debug information files
 *.dwo
 
