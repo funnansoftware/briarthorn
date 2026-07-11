@@ -2,7 +2,6 @@ find_program(CLANG_FORMAT_EXECUTABLE clang-format QUIET)
 
 if(CLANG_FORMAT_EXECUTABLE)
     file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
-        ${CMAKE_SOURCE_DIR}/app/*
         ${CMAKE_SOURCE_DIR}/src/*
     )
 

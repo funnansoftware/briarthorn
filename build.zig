@@ -1,7 +1,7 @@
 const std = @import("std");
 
-const app_name = "hello-triangle";
-const app_sources = [_][]const u8{"app/hello-triangle/main.cpp"};
+const app_name = "briarthorn-app";
+const app_sources = [_][]const u8{ "src/main.cpp", "src/briarthorn/Game.cpp" };
 const cxx_flags = [_][]const u8{ "-std=c++23", "-Wall", "-Wextra", "-Werror", "-pedantic" };
 
 const Platform = enum { windows, linux, macos, android, emscripten };
@@ -74,6 +74,7 @@ pub fn build(b: *std.Build) void {
         .link_libc = if (platform == .android) true else null,
     });
     mod.addCSourceFiles(.{ .files = &app_sources, .flags = &cxx_flags });
+    mod.addIncludePath(b.path("src"));
     mod.addSystemIncludePath(b.path(include_rel));
 
     switch (platform) {

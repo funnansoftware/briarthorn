@@ -3,6 +3,7 @@
     "include": [
         "../compiler/homebrew-clang.json",
         "../config/binaryDir.json",
+        "../config/coverage.json",
         "../config/debug.json",
         "../config/ninja.json",
         "../config/release.json",
@@ -16,6 +17,19 @@
             "inherits": [
                 "compiler-homebrew-clang",
                 "config-binaryDir",
+                "config-debug",
+                "config-ninja",
+                "config-vcpkg",
+                "host-arm64-macos",
+                "target-arm64-macos"
+            ]
+        },
+        {
+            "name": "arm64-macos-clang-coverage",
+            "inherits": [
+                "compiler-homebrew-clang",
+                "config-binaryDir",
+                "config-coverage",
                 "config-debug",
                 "config-ninja",
                 "config-vcpkg",
@@ -42,6 +56,10 @@
             "configurePreset": "arm64-macos-clang-debug"
         },
         {
+            "name": "arm64-macos-clang-coverage",
+            "configurePreset": "arm64-macos-clang-coverage"
+        },
+        {
             "name": "arm64-macos-clang-release",
             "configurePreset": "arm64-macos-clang-release"
         }
@@ -50,6 +68,13 @@
         {
             "name": "arm64-macos-clang-debug",
             "configurePreset": "arm64-macos-clang-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "arm64-macos-clang-coverage",
+            "configurePreset": "arm64-macos-clang-coverage",
             "output": {
                 "outputOnFailure": true
             }

@@ -9,6 +9,10 @@
         {
             "name": "glfw3",
             "platform": "!emscripten & !android"
+        },
+        {
+            "name": "gtest",
+            "platform": "!emscripten & !android"
         }
     ]
 }

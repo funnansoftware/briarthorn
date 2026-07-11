@@ -35,13 +35,13 @@ val ndkDirForCmake: String = run {
 }
 
 android {
-    namespace     = "com.funnansoftware.hellotriangle"
+    namespace     = "com.funnansoftware.briarthorn"
     compileSdk    = 36
     // Must match Pkg.Revision in $ANDROID_NDK_HOME/source.properties
     ndkVersion    = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "com.funnansoftware.hellotriangle"
+        applicationId = "com.funnansoftware.briarthorn"
         minSdk        = 26
         targetSdk     = 36
         versionCode   = 1
@@ -66,7 +66,7 @@ android {
                     "-DVCPKG_TARGET_TRIPLET=arm64-android",
                     "-DVCPKG_HOST_TRIPLET=$vcpkgHostTriplet",
                     // Keep all vcpkg dependencies as static libs; only our app
-                    // target is explicitly built as SHARED (see app/hello-triangle/CMakeLists.txt)
+                    // target is explicitly built as SHARED (see src/CMakeLists.txt)
                     "-DBUILD_SHARED_LIBS=OFF"
                 )
                 // On Windows, AGP's NdkHandler produces backslash paths which cmake 4.x
@@ -78,8 +78,8 @@ android {
                     cmakeArgs += "-DCMAKE_ANDROID_NDK=$ndkDirForCmake"
                 }
                 arguments(*cmakeArgs.toTypedArray())
-                // Only build the hello-triangle shared library; skip tests and other targets
-                targets("hello-triangle")
+                // Only build the app shared library; skip tests and other targets
+                targets("briarthorn-app")
             }
         }
     }

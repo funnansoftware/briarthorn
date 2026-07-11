@@ -4,7 +4,7 @@ if(NOT ANDROID AND NOT EMSCRIPTEN)
     if(CLANG_TIDY)
         include(ProcessorCount)
         ProcessorCount(NPROC)
-        set(CLANG_TIDY_SOURCE_FILTER "^${CMAKE_SOURCE_DIR}/(src|app)/.*\\.(cpp|ixx)$")
+        set(CLANG_TIDY_SOURCE_FILTER "^${CMAKE_SOURCE_DIR}/src/.*\\.(cpp|ixx)$")
 
         if(NPROC LESS 3)
             message(STATUS "Processor count is ${NPROC}, using 3 for clang-tidy to ensure good performance.")
@@ -25,7 +25,7 @@ if(NOT ANDROID AND NOT EMSCRIPTEN)
         if(CLANG_TIDY_DIFF)
             add_custom_target(clang-tidy-diff
                 COMMAND git config --global --add safe.directory "${CMAKE_SOURCE_DIR}" || true
-                COMMAND git diff origin/main | clang-tidy-diff -p1 -path ${CMAKE_BINARY_DIR} -j ${NPROC} -header-filter=".*(src|app)/(?!.*test/).*"
+                COMMAND git diff origin/main | clang-tidy-diff -p1 -path ${CMAKE_BINARY_DIR} -j ${NPROC} -header-filter=".*src/(?!.*test/).*"
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 COMMENT "Running clang-tidy on files changed from main"
                 VERBATIM

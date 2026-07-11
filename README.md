@@ -87,7 +87,7 @@ Requires `ANDROID_NDK_HOME`, plus an Android SDK and a JDK for APK packaging
 regenerated automatically when stale). Produces:
 
 - the NativeActivity library
-  `build/<target>-<optimize>/installed/lib/libhello-triangle.so` (API level 35
+  `build/<target>-<optimize>/installed/lib/libbriarthorn-app.so` (API level 35
   by default, matching the CMake presets), and
 - an APK at `build/<target>-<optimize>/installed/apk/app-debug.apk`
   (`app-release.apk` for release optimize modes), packaged by the gradle
@@ -107,12 +107,12 @@ The first web build bootstraps emscripten from the [emsdk](emsdk/) submodule
 (install + activate, pinned by the submodule commit; the downloaded toolchain
 lives gitignored in `.emsdk/<host>`, keyed by host OS so a tree shared across
 operating systems keeps one install per platform). Produces
-`build/wasm32-emscripten-<optimize>/installed/web/hello-triangle.{html,js,wasm}`.
+`build/wasm32-emscripten-<optimize>/installed/web/briarthorn-app.{html,js,wasm}`.
 Browsers won't load wasm from `file://`, so serve the directory:
 
 ```sh
 python -m http.server -d build/wasm32-emscripten-debug/installed/web
-# then open http://localhost:8000/hello-triangle.html
+# then open http://localhost:8000/briarthorn-app.html
 ```
 
 ### Options
