@@ -15,6 +15,9 @@ try
     // bt.systems.emplace_back(Missile);
     // bt.systems.emplace_back(Radar);
     // bt.systems.emplace_back(Collision);
+
+    // bt::Renderer renderer{bt};
+
     // bt.graphics = std::make_unique<Raylib>();
     // bt.graphics->addChild(std::make_unique<TrackView>());
     // bt.graphics->render();
