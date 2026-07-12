@@ -59,37 +59,9 @@ jobs:
 
       - uses: ./.github/actions/get-vcpkg
 
-      # TEMP DIAGNOSTIC: prove whether the zig toolchain compiles standalone in
-      # the sniper env before vcpkg exercises it via the x64-linux-zig chainload.
-      - name: zig-doctor
-        shell: bash
-        run: |
-          set -x
-          echo "PATH=$PATH"
-          command -v zig
-          zig version
-          zig env || true
-          printf 'int main(void){return 0;}\n' > /tmp/t.c
-          zig cc /tmp/t.c -o /tmp/t && echo "zig cc OK" || echo "zig cc FAILED rc=$?"
-          printf 'int main(){return 0;}\n' > /tmp/t.cpp
-          zig c++ /tmp/t.cpp -o /tmp/tpp && echo "zig c++ OK" || echo "zig c++ FAILED rc=$?"
-          ls -l scripts/zigcc.sh scripts/zig++.sh
-          ./scripts/zigcc.sh /tmp/t.c -o /tmp/t2 && echo "wrapper zigcc OK" || echo "wrapper zigcc FAILED rc=$?"
-
       - name: zig-build
         shell: bash
         run: zig build --summary all
-
-      # TEMP DIAGNOSTIC: vcpkg writes the real CMake failure to on-disk logs that
-      # never reach the console; surface them when the build fails.
-      - name: dump-vcpkg-detect-logs
-        if: failure()
-        shell: bash
-        run: |
-          for l in "$VCPKG_ROOT"/buildtrees/detect_compiler/*.log; do
-            echo "======== $l ========"
-            cat "$l" || true
-          done
 
       - name: zig-test
         shell: bash
