@@ -11,6 +11,7 @@ try
     // bt.entities
     // bt.projection
     // bt.commands
+    // bt.palette
     // bt.systems.emplace_back(Missile);
     // bt.systems.emplace_back(Radar);
     // bt.systems.emplace_back(Collision);

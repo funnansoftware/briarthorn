@@ -17,12 +17,30 @@ target_link_libraries(briarthorn
         briarthorn-game
 )
 
+# Windows: embed the application icon into the .exe via a resource script, so
+# Explorer, the taskbar, and Alt-Tab show it. Skip the Zig/MinGW (windows-gnu)
+# toolchain — no RC compiler is configured for it here, and the native
+# `zig build` path embeds the icon itself (addWin32ResourceFile in
+# src/build.zig). MSVC / clang-cl compile briarthorn.rc with rc.exe and link the
+# resulting .res.
+if(WIN32 AND NOT CMAKE_CXX_COMPILER_TARGET MATCHES "windows-gnu")
+    enable_language(RC)
+    target_sources(briarthorn PRIVATE briarthorn.rc)
+endif()
+
 if(EMSCRIPTEN)
     target_link_options(briarthorn
         PRIVATE
             -sUSE_GLFW=3
             -sASYNCIFY
+            # Custom HTML shell that carries the app icon as the browser-tab
+            # favicon (SHELL: keeps the flag and its path together through
+            # CMake's option de-duplication).
+            "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"
     )
+    # Re-link when the shell changes (link options are not tracked as inputs).
+    set_target_properties(briarthorn PROPERTIES
+        LINK_DEPENDS "${CMAKE_SOURCE_DIR}/web/shell.html")
 
     set_target_properties(briarthorn PROPERTIES SUFFIX ".html")
 

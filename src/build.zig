@@ -24,6 +24,14 @@ pub fn configure(c: *const Ctx) void {
             // target_link_libraries(app PRIVATE briarthorn-game); raylib and the
             // system libs come transitively from briarthorn-game.
             app.linkLibrary(lib);
+
+            // Windows: embed the application icon into the .exe. Zig's built-in
+            // resource compiler (resinator) compiles src/briarthorn.rc and links
+            // it, so Explorer, the taskbar, and Alt-Tab show the icon — the
+            // native-build analog of the MSVC .rc handling in src/CMakeLists.txt.
+            if (c.platform == .windows)
+                app.addWin32ResourceFile(.{ .file = c.b.path("src/briarthorn.rc") });
+
             const exe = c.b.addExecutable(.{ .name = config.app_name, .root_module = app });
             c.install(exe, "bin");
             c.runStep(exe);

@@ -42,6 +42,10 @@ pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, briarthorn: *std.Bui
     };
     emcc.addArgs(opt_flags);
     emcc.addArgs(&.{ "-sUSE_GLFW=3", "-sASYNCIFY" });
+    // Custom HTML shell that carries the app icon as the browser-tab favicon.
+    // addFileArg registers it as an input so a shell edit re-runs emcc.
+    emcc.addArg("--shell-file");
+    emcc.addFileArg(b.path("web/shell.html"));
     // app.a -> briarthorn.a -> raylib.a: each references symbols in the next.
     emcc.addArtifactArg(lib);
     emcc.addArtifactArg(briarthorn);
