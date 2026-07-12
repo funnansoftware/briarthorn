@@ -7,6 +7,7 @@
 [![web](https://github.com/funnansoftware/briarthorn/actions/workflows/web.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/web.yml)
 [![android](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/android.yml)
 [![zig](https://github.com/funnansoftware/briarthorn/actions/workflows/zig.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/zig.yml)
+[![steamos](https://github.com/funnansoftware/briarthorn/actions/workflows/steamos.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/steamos.yml)
 
 A cross-platform C++23 [raylib](https://www.raylib.com/) application for
 **Windows, Linux, macOS, Android, and the web (WebAssembly)**, with dependencies
@@ -89,6 +90,33 @@ python3 -m http.server -d build/wasm32-emscripten-releasefast/installed/web
 zig build -Dtarget=aarch64-linux-android
 adb install build/aarch64-linux-android-releasefast/installed/apk/app-release.apk
 ```
+
+### Steam Deck (SteamOS)
+
+SteamOS is x86_64 Linux, so the same `zig build` works — the catch is the **glibc
+floor**. briarthorn's Linux toolchain links natively, so a binary's minimum glibc
+equals the glibc of the machine it was built on, and the main devcontainer's
+bleeding-edge glibc fails on the Deck with `GLIBC_x.xx not found`. The
+[`steamos` devcontainer](.devcontainer/steamos) fixes this by building against the
+Steam Linux Runtime 3.0 "sniper" SDK (Debian 11, glibc 2.31) — below the Deck's
+floor, so the binary runs there directly and inside the Steam runtime container.
+
+Open it in VS Code (**Dev Containers: Reopen in Container → briarthorn-steamos**),
+then:
+
+```sh
+zig build        # release -> build/x86_64-linux-gnu-releasefast/installed
+zig build test   # GoogleTest suite, run against the sniper glibc floor
+
+# Confirm nothing newer than the sniper floor leaked in before shipping:
+objdump -T build/x86_64-linux-gnu-releasefast/installed/bin/briarthorn-app \
+  | grep -oE 'GLIBC_[0-9.]+' | sort -uV | tail -1   # expect GLIBC_2.31 or lower
+```
+
+Copy `build/x86_64-linux-gnu-releasefast/installed/` to the Deck and run
+`bin/briarthorn-app` from Desktop Mode, or add it to Steam as a non-Steam game. CI
+([steamos.yml](.github/workflows/steamos.yml)) builds this on every push and
+uploads the install tree as an artifact.
 
 ## License
 
