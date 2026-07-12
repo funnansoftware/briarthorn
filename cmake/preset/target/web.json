@@ -4,13 +4,7 @@
         {
             "name": "target-web",
             "hidden": true,
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
             "cacheVariables": {
-                "VCPKG_HOST_TRIPLET": "x64-linux",
                 "VCPKG_TARGET_TRIPLET": "wasm32-emscripten"
             }
         }

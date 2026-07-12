@@ -1,11 +1,11 @@
-add_library(briarthorn STATIC)
+add_library(briarthorn-game STATIC)
 
-target_sources(briarthorn
+target_sources(briarthorn-game
     PRIVATE
         Briarthorn.cpp
 )
 
-target_include_directories(briarthorn
+target_include_directories(briarthorn-game
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
@@ -16,8 +16,8 @@ endif()
 
 find_package(raylib CONFIG REQUIRED)
 
-# PUBLIC: Game.hpp exposes raylib types (Vector2) to consumers.
-target_link_libraries(briarthorn
+# PUBLIC: Briarthorn.hpp exposes raylib types (Vector2) to consumers.
+target_link_libraries(briarthorn-game
     PUBLIC
         raylib
 )
@@ -27,7 +27,7 @@ if(NOT EMSCRIPTEN AND NOT ANDROID)
 
     # Link glfw AFTER raylib so the static linker can resolve raylib's
     # references to glfw symbols (single-pass left-to-right resolution).
-    target_link_libraries(briarthorn
+    target_link_libraries(briarthorn-game
         PRIVATE
             glfw
     )

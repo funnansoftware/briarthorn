@@ -15,7 +15,7 @@
 
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="briarthorn-app" />
+                android:value="briarthorn" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

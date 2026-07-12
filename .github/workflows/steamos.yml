@@ -73,7 +73,7 @@ jobs:
       - name: verify-glibc-floor
         shell: bash
         run: |
-          bin=build/x86_64-linux-gnu-releasefast/installed/bin/briarthorn-app
+          bin=build/x86_64-linux-gnu-releasefast/installed/bin/briarthorn
           max=$(objdump -T "$bin" | grep -oE 'GLIBC_[0-9]+\.[0-9]+(\.[0-9]+)?' | sort -uV | tail -1)
           echo "highest glibc symbol required: ${max:-none}"
           if [ -n "$max" ] && [ "$(printf '%s\nGLIBC_2.31\n' "$max" | sort -V | tail -1)" != "GLIBC_2.31" ]; then

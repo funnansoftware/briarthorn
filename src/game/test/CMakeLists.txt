@@ -6,7 +6,7 @@ add_executable(briarthorn-test
 
 target_link_libraries(briarthorn-test
     PRIVATE
-        briarthorn
+        briarthorn-game
         GTest::gtest_main
 )
 

@@ -10,7 +10,7 @@
 #
 # The zig web build (build.zig) bootstraps the same layout automatically;
 # this script exists for the CMake-only flow (CI and local presets). On
-# Windows, bootstrap through `zig build -Dtarget=wasm32-emscripten` instead.
+# Windows, use scripts/bootstrap-emsdk.bat instead.
 set -eu
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -20,7 +20,7 @@ host="$(uname -s)"
 case "$host" in
 Linux | Darwin) ;;
 *)
-    echo "unsupported host '$host'; bootstrap via 'zig build -Dtarget=wasm32-emscripten' or a manual emsdk install" >&2
+    echo "unsupported host '$host'; on Windows run scripts/bootstrap-emsdk.bat, or bootstrap via 'zig build -Dtarget=wasm32-emscripten'" >&2
     exit 1
     ;;
 esac

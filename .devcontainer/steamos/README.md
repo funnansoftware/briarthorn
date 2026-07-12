@@ -1,6 +1,6 @@
 # Steam Deck build container (Steam Linux Runtime "sniper")
 
-A second devcontainer whose only job is to produce a `briarthorn-app` binary that
+A second devcontainer whose only job is to produce a `briarthorn` binary that
 **runs on the Steam Deck**. The default dev container (`.devcontainer/`) is Ubuntu
 25.10 with a bleeding-edge glibc; anything built there fails on the Deck with
 `version 'GLIBC_x.xx' not found`.
@@ -47,11 +47,11 @@ toolchain.
 Before shipping, confirm nothing newer than the sniper floor leaked in:
 
 ```sh
-objdump -T build/x86_64-linux-gnu-releasefast/installed/bin/briarthorn-app \
+objdump -T build/x86_64-linux-gnu-releasefast/installed/bin/briarthorn \
   | grep -oE 'GLIBC_[0-9.]+' | sort -uV | tail -1
 # expect: GLIBC_2.31 (or lower)
 ```
 
 Then copy `build/x86_64-linux-gnu-releasefast/installed/` to the Deck and run
-`bin/briarthorn-app` from Desktop Mode, or add it to Steam as a non-Steam game so
+`bin/briarthorn` from Desktop Mode, or add it to Steam as a non-Steam game so
 Steam wraps it in the Steam Linux Runtime.

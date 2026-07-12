@@ -79,7 +79,7 @@ android {
                 }
                 arguments(*cmakeArgs.toTypedArray())
                 // Only build the app shared library; skip tests and other targets
-                targets("briarthorn-app")
+                targets("briarthorn")
             }
         }
     }

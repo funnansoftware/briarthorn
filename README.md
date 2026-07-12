@@ -11,115 +11,206 @@
 [![zig](https://github.com/funnansoftware/briarthorn/actions/workflows/zig.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/zig.yml)
 [![steamos](https://github.com/funnansoftware/briarthorn/actions/workflows/steamos.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/steamos.yml)
 
-A cross-platform C++23 [raylib](https://www.raylib.com/) application for
-**Windows, Linux, macOS, Android, and the web (WebAssembly)**, with dependencies
-managed by [vcpkg](https://github.com/microsoft/vcpkg). Build it with a single
-`zig build`, or with CMake presets.
+A cross-platform C++23 roguelike that requires the player to pilot a unique aircraft class to fight through enemies and challenges to discover the mystery of briarthorn.
 
-## Prerequisites
+# Get Started
 
-Everyone needs [git](https://git-scm.com/) and the system libraries raylib's
-windowing layer (GLFW) is built against:
+Pick your platform below. Each builds two ways — with **Zig** or with **CMake & Ninja**:
 
-| OS | Install |
-| --- | --- |
-| Linux | `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config` |
-| macOS | Xcode Command Line Tools: `xcode-select --install` |
-| Windows | nothing extra — the Windows SDK from Visual Studio covers it |
+- [Prerequisites](#prerequisites)
+- [Platforms](#platforms)
+  - [windows](#windows)
+  - [linux](#linux)
+  - [mac](#macos)
+  - [web](#web)
+  - [steamos](#steamos)
+  - [android](#android)
+- [License](#license)
 
-Then install the tools for your build path:
+# Prerequisites
 
-- **zig** — a master (nightly) build of [zig](https://ziglang.org/download/); the
-  pinned version is in [.zigversion](.zigversion).
-- **CMake presets** — [CMake](https://cmake.org/download/),
-  [Ninja](https://github.com/ninja-build/ninja/releases), and your platform's
-  compiler: Visual Studio 2022 (Windows), GCC (Linux), or Homebrew LLVM
-  (`brew install llvm@21`, macOS).
-
-Web builds download emscripten automatically (one-time, ~1.5 GB); Android needs
-an [NDK](https://developer.android.com/ndk) (plus an SDK and JDK to package an
-APK). The [devcontainer](.devcontainer) ships everything for Linux hosts.
-
-## Clone
-
-vcpkg is a submodule, so clone recursively:
+briarthorn vendors vcpkg and emsdk as submodules, so clone recursively:
 
 ```sh
 git clone --recurse-submodules https://github.com/funnansoftware/briarthorn.git
 ```
 
-Already cloned without submodules? Run `git submodule update --init`.
+Every build also needs [git](https://git-scm.com/) and a few system libraries:
 
-## Build and run
+| OS      | Install                                                                                |
+| ------- | -------------------------------------------------------------------------------------- |
+| Linux   | `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config` |
+| macOS   | Xcode Command Line Tools: `xcode-select --install`                                     |
+| Windows | nothing extra — the Windows SDK from Visual Studio covers it                           |
 
-### With zig
+Then set up one toolchain — Zig, or CMake & Ninja.
 
-One command builds an optimized release and runs it:
+## With Zig
+
+- [zig](https://ziglang.org/download/) — a nightly build, pinned in
+  [.zigversion](.zigversion) (currently `0.17.0-dev.1275+59a628c6d`).
+- On macOS, also `brew install pkg-config`.
+
+## With CMake & Ninja
+
+- [CMake](https://cmake.org/download/) &ge; 3.31,
+  [Ninja](https://github.com/ninja-build/ninja/releases), and a C++23 compiler:
+  Visual Studio 2022 (Windows), GCC (Linux), or Homebrew LLVM (`brew install
+llvm@21`, macOS).
+- **web** also needs the emscripten SDK — run `scripts/bootstrap-emsdk.sh`
+  (Linux/macOS) or `scripts\bootstrap-emsdk.bat` (Windows) once.
+- **android** also needs an [NDK](https://developer.android.com/ndk), plus an SDK
+  and JDK to package an APK.
+
+# Platforms
+
+## Windows
+
+Needs [Zig](#with-zig) or [CMake & Ninja](#with-cmake--ninja).
+
+### With Zig
 
 ```sh
 zig build run
 ```
 
-vcpkg bootstraps itself on the first build. Add `-Doptimize=Debug` for a debug build.
-Run the GoogleTest suite (desktop hosts) with `zig build test`.
+### With CMake & Ninja
 
-### With CMake presets
+Run from a Visual Studio 2022 developer shell:
 
-Use the shorthand preset for your OS — `windows`, `linux`, or `macos`:
+```sh
+cmake --preset windows                            # configure (release)
+cmake --build --preset windows                    # build
+cmake --build --preset windows --target install   # install
+build/windows/installed/bin/briarthorn.exe    # run
+```
+
+## Linux
+
+Needs [Zig](#with-zig) or [CMake & Ninja](#with-cmake--ninja).
+
+### With Zig
+
+```sh
+zig build run
+```
+
+### With CMake & Ninja
 
 ```sh
 cmake --preset linux                            # configure (release)
 cmake --build --preset linux                    # build
 cmake --build --preset linux --target install   # install
-./build/linux/installed/bin/briarthorn-app      # run
+./build/linux/installed/bin/briarthorn      # run
 ```
 
-`cmake --list-presets` lists every preset for your OS. The named ones select a
-specific compiler or build type — e.g. `linux-clang-debug`, `windows-zig-release`,
-`macos-clang-coverage`.
+## MacOS
 
-### Web and Android
+Needs [Zig](#with-zig) or [CMake & Ninja](#with-cmake--ninja).
 
-zig cross-compiles these from any host:
+### With Zig
 
 ```sh
-# Web — build, then serve it and open in a browser.
+zig build run
+```
+
+### With CMake & Ninja
+
+```sh
+cmake --preset macos                            # configure (release)
+cmake --build --preset macos                    # build
+cmake --build --preset macos --target install   # install
+./build/macos/installed/bin/briarthorn      # run
+```
+
+## Web
+
+Needs [Zig](#with-zig) or [CMake & Ninja](#with-cmake--ninja). Either way, serve
+the output over http and open the `.html`.
+
+### With Zig
+
+Cross-compiles from any host:
+
+```sh
 zig build -Dtarget=wasm32-emscripten
 python3 -m http.server -d build/wasm32-emscripten-releasefast/installed/web
-# open http://localhost:8000/briarthorn-app.html
+# open http://localhost:8000/briarthorn.html
+```
 
-# Android — build the APK, then install it on a device or emulator.
+### With CMake & Ninja
+
+Build the `web-release` preset (there's no bare `web` shorthand):
+
+```sh
+cmake --preset web-release
+cmake --build --preset web-release
+cmake --build --preset web-release --target install
+python3 -m http.server -d build/web-release/installed/web
+# open http://localhost:8000/briarthorn.html
+```
+
+## SteamOS
+
+Needs [Zig](#with-zig) or [CMake & Ninja](#with-cmake--ninja), built inside the
+`briarthorn-steamos` devcontainer (**Dev Containers: Reopen in Container →
+briarthorn-steamos**).
+
+SteamOS is x86_64 Linux, so a normal build produces a Steam Deck binary — but one
+built in the main devcontainer fails on the Deck with `GLIBC_x.xx not found`,
+because its glibc is newer than the Deck's. The
+[`steamos` devcontainer](.devcontainer/steamos) builds against the older Steam
+Linux Runtime "sniper" glibc (2.31), which the Deck can run.
+
+### With Zig
+
+```sh
+zig build        # release -> build/x86_64-linux-gnu-releasefast/installed
+```
+
+Copy `build/x86_64-linux-gnu-releasefast/installed/` to the Deck and run
+`bin/briarthorn` from Desktop Mode, or add it to Steam as a non-Steam game.
+
+### With CMake & Ninja
+
+The `linux-zig-release` preset drives the same toolchain:
+
+```sh
+cmake --preset linux-zig-release
+cmake --build --preset linux-zig-release
+cmake --build --preset linux-zig-release --target install
+```
+
+## Android
+
+Needs [Zig](#with-zig) or [CMake & Ninja](#with-cmake--ninja).
+
+### With Zig
+
+Cross-compiles from any host:
+
+```sh
 zig build -Dtarget=aarch64-linux-android
 adb install build/aarch64-linux-android-releasefast/installed/apk/app-release.apk
 ```
 
-### Steam Deck (SteamOS)
+Pass `-Dandroid-api=<level>` for a specific API level (default 35).
 
-SteamOS is x86_64 Linux, so the same `zig build` works — the catch is the **glibc
-floor**. briarthorn's Linux toolchain links natively, so a binary's minimum glibc
-equals the glibc of the machine it was built on, and the main devcontainer's
-bleeding-edge glibc fails on the Deck with `GLIBC_x.xx not found`. The
-[`steamos` devcontainer](.devcontainer/steamos) fixes this by building against the
-Steam Linux Runtime 3.0 "sniper" SDK (Debian 11, glibc 2.31) — below the Deck's
-floor, so the binary runs there directly and inside the Steam runtime container.
+### With CMake & Ninja
 
-Open it in VS Code (**Dev Containers: Reopen in Container → briarthorn-steamos**),
-then:
+These presets need a Linux host (build from another host with [Zig](#with-zig-6)
+above). Build `android-release`, then package an APK with the `apk` target:
 
 ```sh
-zig build        # release -> build/x86_64-linux-gnu-releasefast/installed
-zig build test   # GoogleTest suite, run against the sniper glibc floor
-
-# Confirm nothing newer than the sniper floor leaked in before shipping:
-objdump -T build/x86_64-linux-gnu-releasefast/installed/bin/briarthorn-app \
-  | grep -oE 'GLIBC_[0-9.]+' | sort -uV | tail -1   # expect GLIBC_2.31 or lower
+cmake --preset android-release                        # configure
+cmake --build --preset android-release                # build
+cmake --build --preset android-release --target apk   # package the APK
+adb install build/android-release/outputs/apk/release/app-release.apk
 ```
 
-Copy `build/x86_64-linux-gnu-releasefast/installed/` to the Deck and run
-`bin/briarthorn-app` from Desktop Mode, or add it to Steam as a non-Steam game. CI
-([steamos.yml](.github/workflows/steamos.yml)) builds this on every push and
-uploads the install tree as an artifact.
+Gradle finds your SDK via `android/local.properties` — create it with
+`sdk.dir=/path/to/android-sdk`.
 
-## License
+# License
 
 Non-commercial use — see [LICENSE.md](LICENSE.md).

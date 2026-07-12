@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <briarthorn/Briarthorn.hpp>
+#include <game/Briarthorn.hpp>
 
 namespace
 {

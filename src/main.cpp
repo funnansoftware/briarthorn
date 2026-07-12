@@ -2,7 +2,7 @@
 #include <exception>
 #include <iostream>
 
-#include <briarthorn/Briarthorn.hpp>
+#include <game/Briarthorn.hpp>
 
 auto main() -> int
 try

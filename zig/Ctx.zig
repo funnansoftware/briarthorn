@@ -48,7 +48,7 @@ pub const Ctx = struct {
     }
 
     /// A C++ module configured for the target: libc/libc++, the src/ include
-    /// root (`<briarthorn/Briarthorn.hpp>`), the vcpkg include root
+    /// root (`<game/Briarthorn.hpp>`), the vcpkg include root
     /// (`<raylib.h>`, `<gtest/gtest.h>`), and any platform system includes.
     pub fn module(c: *const Ctx) *std.Build.Module {
         const b = c.b;
