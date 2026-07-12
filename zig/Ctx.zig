@@ -59,6 +59,7 @@ pub const Ctx = struct {
             // (ziglang/zig#23302); android links the NDK's libc++ instead.
             .link_libcpp = if (c.platform == .android) null else true,
             .link_libc = if (c.platform == .android) true else null,
+            .pic = true,
         });
         mod.addIncludePath(b.path("src"));
         mod.addSystemIncludePath(b.path(c.include_rel));
