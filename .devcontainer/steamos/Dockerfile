@@ -49,6 +49,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# On first use zig compiles libc++ from source for the native target, and for a
+# native glibc target it uses the *system* headers: <errno.h> pulls in
+# <linux/errno.h> -> <asm/errno.h>. On Debian multiarch the asm headers live
+# under /usr/include/x86_64-linux-gnu/asm, but zig's native libc detection only
+# adds /usr/include here (the Ubuntu devcontainer's zig finds the multiarch dir
+# on its own; this older base does not). Install the kernel userspace headers and
+# expose asm/ at the generic path so the include resolves — otherwise the very
+# first `zig c++` fails with "'asm/errno.h' file not found".
+RUN apt-get update && apt-get install -y --no-install-recommends linux-libc-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sfn x86_64-linux-gnu/asm /usr/include/asm
+
 # Modern CMake. The presets use schema "version": 7 and CMakeLists requires
 # CMake >= 3.31; Debian 11 ships 3.18 and Kitware's apt repo is Ubuntu-only, so
 # install the official upstream binary release directly.
