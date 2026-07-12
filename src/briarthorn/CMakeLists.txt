@@ -2,7 +2,7 @@ add_library(briarthorn STATIC)
 
 target_sources(briarthorn
     PRIVATE
-        Game.cpp
+        Briarthorn.cpp
 )
 
 target_include_directories(briarthorn

@@ -4,9 +4,8 @@
 
 #include <raylib.h>
 
-namespace briarthorn
+namespace bt
 {
-
     struct WindowSize
     {
         int width;
@@ -20,10 +19,10 @@ namespace briarthorn
         Vector2 right;
     };
 
-    class Game
+    class Briarthorn
     {
     public:
-        Game(WindowSize size, std::string title);
+        Briarthorn(WindowSize size, std::string title);
 
         [[nodiscard]] auto size() const -> WindowSize;
         [[nodiscard]] auto title() const -> const std::string &;
@@ -41,4 +40,4 @@ namespace briarthorn
         std::string title_;
     };
 
-} // namespace briarthorn
+}

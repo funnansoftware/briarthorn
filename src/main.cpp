@@ -2,15 +2,26 @@
 #include <exception>
 #include <iostream>
 
-#include <briarthorn/Game.hpp>
+#include <briarthorn/Briarthorn.hpp>
 
 auto main() -> int
 try
 {
-    constexpr briarthorn::WindowSize windowSize{.width = 800, .height = 600};
+    // Briarthorn bt;
+    // bt.entities
+    // bt.projection
+    // bt.commands
+    // bt.systems.emplace_back(Missile);
+    // bt.systems.emplace_back(Radar);
+    // bt.systems.emplace_back(Collision);
+    // bt.graphics = std::make_unique<Raylib>();
+    // bt.graphics->addChild(std::make_unique<TrackView>());
+    // bt.graphics->render();
 
-    const briarthorn::Game game{windowSize, "Hello, Triangle"};
-    game.run();
+    constexpr bt::WindowSize windowSize{.width = 800, .height = 600};
+
+    const bt::Briarthorn bt{windowSize, "Hello, Triangle"};
+    bt.run();
 
     return EXIT_SUCCESS;
 }
