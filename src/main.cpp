@@ -8,9 +8,9 @@ auto main() -> int
 try
 {
     // Briarthorn bt;
-    // bt.entities
-    // bt.projection
-    // bt.commands
+    // bt.entities.emplace_back();
+    // bt.projection.set_zoom();
+    // bt.commands.emplace_back(Turn{});
     // bt.palette
     // bt.systems.emplace_back(Missile);
     // bt.systems.emplace_back(Radar);
@@ -26,6 +26,12 @@ try
 
     const bt::Briarthorn bt{windowSize, "Hello, Triangle"};
     bt.run();
+
+    // loop over systems
+    //   system.update(this->entities, deltaTime);
+
+    // render(this->entities, deltaTime);
+    //     abilitybuttons -> command();
 
     return EXIT_SUCCESS;
 }

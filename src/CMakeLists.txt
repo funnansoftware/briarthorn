@@ -1,4 +1,5 @@
 add_subdirectory(game)
+add_subdirectory(raylib)
 
 if(ANDROID)
     # Android's NativeActivity loads the app as a shared library.
@@ -15,6 +16,7 @@ target_sources(briarthorn
 target_link_libraries(briarthorn
     PRIVATE
         briarthorn-game
+        briarthorn-raylib
 )
 
 # Windows: embed the application icon into the .exe via a resource script, so

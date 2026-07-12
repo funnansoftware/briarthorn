@@ -56,6 +56,11 @@ auto Briarthorn::run() const -> void
 
     while (!WindowShouldClose())
     {
+        for (const auto &system : systems_)
+        {
+            system->update(0.0F);
+        }
+
         BeginDrawing();
         ClearBackground(GRAY);
         DrawTriangle(shape.top, shape.left, shape.right, ORANGE);

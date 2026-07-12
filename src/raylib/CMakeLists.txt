@@ -1,9 +1,10 @@
-project(briarthorn-game)
+project(briarthorn-raylib)
 
 add_library(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME} PUBLIC
-    Briarthorn.cpp
+    Renderer.cpp
+    Window.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -19,6 +20,7 @@ find_package(raylib CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
+        briarthorn-game
         raylib
 )
 
@@ -33,6 +35,6 @@ if(NOT EMSCRIPTEN AND NOT ANDROID)
     )
 endif()
 
-if(BUILD_TESTING AND NOT ANDROID AND NOT EMSCRIPTEN)
-    add_subdirectory(test)
-endif()
+# if(BUILD_TESTING AND NOT ANDROID AND NOT EMSCRIPTEN)
+#     add_subdirectory(test)
+# endif()

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <string>
-
 #include <raylib.h>
+#include <game/System.hpp>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace bt
 {
@@ -36,6 +38,7 @@ namespace bt
         auto run() const -> void;
 
     private:
+        std::vector<std::unique_ptr<System>> systems_;
         WindowSize size_;
         std::string title_;
     };
