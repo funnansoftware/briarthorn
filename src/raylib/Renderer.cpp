@@ -88,4 +88,6 @@ auto Renderer::render(const bt::game::World& world) -> void
     }
 
     EndDrawing();
+    PollInputEvents();
+    SwapScreenBuffer();
 }
