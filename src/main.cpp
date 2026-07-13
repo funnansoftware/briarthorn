@@ -2,22 +2,22 @@
 #include <exception>
 #include <iostream>
 
-#include <game/Briarthorn.hpp>
+#include <Briarthorn.hpp>
 
 auto main() -> int
 try
 {
-    constexpr bt::WindowSize windowSize{.width = 800, .height = 600};
+    bt::Briarthorn briarthorn;
 
-    bt::Briarthorn bt{windowSize, "Hello, Triangle"};
+    // Enable graphics (opens the window). Drop this line and the same Briarthorn
+    // runs headless.
+    briarthorn.initGraphics();
 
-    
-
-    bt.run();
+    briarthorn.run();
 
     return EXIT_SUCCESS;
 }
-catch (const std::exception &error)
+catch (const std::exception& error)
 {
     std::cerr << "briarthorn: " << error.what() << '\n';
     return EXIT_FAILURE;

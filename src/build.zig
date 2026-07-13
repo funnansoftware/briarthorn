@@ -11,10 +11,14 @@ const android = @import("../zig/android.zig");
 const emscripten = @import("../zig/emscripten.zig");
 
 pub fn configure(c: *const Ctx) void {
-    const lib = game.configure(c); // add_subdirectory(game)
+    // add_subdirectory(game/raylib). For Zig the two CMake layers compile into one
+    // briarthorn-game archive (see src/game/build.zig for why); the app links that
+    // single library.
+    const lib = game.configure(c);
 
+    // The app: the Briarthorn owning object plus the entry point.
     const app = c.module();
-    c.addSources(app, "src", &.{"main.cpp"});
+    c.addSources(app, "src", &.{ "Briarthorn.cpp", "main.cpp" });
 
     // What "the app" is — and how briarthorn-game is linked into it — depends on
     // the platform, exactly as in src/CMakeLists.txt. Each branch links the

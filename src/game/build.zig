@@ -1,20 +1,28 @@
-//! src/game — a linkable library module. The CMakeLists.txt analog:
-//! add_library(briarthorn-game STATIC) + target_sources + add_subdirectory(test).
+//! src/game — the raylib-free game core (simulation + state).
+//!
+//! CMake keeps two libraries (src/game, src/raylib). For the Zig build they are
+//! compiled into ONE briarthorn-game archive: the emscripten and android
+//! final-link helpers each take a single library, and one archive sidesteps
+//! multi-archive link-order questions. Same binary, fewer moving parts. Briarthorn
+//! itself lives in the app module (src/build.zig), not in this library.
 
 const std = @import("std");
 const Ctx = @import("../../zig/Ctx.zig").Ctx;
 const tests = @import("test/build.zig");
 
-/// add_library(briarthorn-game STATIC). Returns the archive so the app (and the
-/// test) can link it (target_link_libraries).
+/// add_library(briarthorn-game STATIC), folding the game core and the raylib edge
+/// in. Links the graphics stack and returns the archive so the app (and test) can
+/// link it.
 pub fn configure(c: *const Ctx) *std.Build.Step.Compile {
     const mod = c.module();
-    c.addSources(mod, "src/game", &.{"Briarthorn.cpp"});
+    // The game core (raylib-free) + the raylib graphics edge.
+    c.addSources(mod, "src/game", &.{ "Clock.cpp", "CommandBuffer.cpp", "Duration.cpp", "Entity.cpp", "Geo.cpp", "Vec2.cpp", "World.cpp", "systems/Movement.cpp" });
+    c.addSources(mod, "src/raylib", &.{ "Renderer.cpp", "Window.cpp" });
 
-    // target_link_libraries(briarthorn-game PUBLIC raylib) + glfw. Desktop links
-    // the graphics stack here so the app and test inherit it transitively (raylib
-    // named before glfw3 for the single-pass linker). Android/emscripten link
-    // raylib in their platform finishApp (an object file / an emcc argument).
+    // target_link_libraries(... PUBLIC raylib) + glfw. Desktop links the graphics
+    // stack here so the app and test inherit it transitively (raylib named before
+    // glfw3 for the single-pass linker). Android/emscripten link raylib in their
+    // platform finishApp (an object file / an emcc argument).
     if (c.isDesktop()) {
         c.linkVcpkg(mod, "raylib");
         c.linkVcpkg(mod, "glfw3");

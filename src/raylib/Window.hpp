@@ -1,10 +1,15 @@
 #pragma once
 
-#include <raylib.h>
 #include <string>
 
 namespace bt::raylib
 {
+    /// RAII owner of raylib's single global window: the constructor opens it
+    /// (throwing if it cannot), the destructor closes it. Non-copyable and
+    /// non-movable — there is exactly one global window, so a Window is a unique
+    /// lifetime guard for it, never a value to copy or move. The frame and query
+    /// calls (BeginDrawing, WindowShouldClose, ...) act on that global, so they
+    /// live on the Renderer that owns the window rather than here.
     class Window
     {
     public:
@@ -15,18 +20,12 @@ namespace bt::raylib
             int height;
         };
 
-        Window(const Traits& traits);
+        explicit Window(const Traits& traits);
         ~Window();
 
-        auto shouldClose() const -> bool;
-
-        auto begin(Color clear) const -> void;
-        auto end() const -> void;
-        auto size() const -> Vector2;
-
-    private:
-        std::string title_;
-        int width_;
-        int height_;
+        Window(const Window&) = delete;
+        auto operator=(const Window&) -> Window& = delete;
+        Window(Window&&) = delete;
+        auto operator=(Window&&) -> Window& = delete;
     };
 }

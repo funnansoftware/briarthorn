@@ -1,40 +1,24 @@
 #include <raylib/Window.hpp>
 
-using bt::raylib::Window;
+#include <stdexcept>
 
-Window::Window(const Traits& traits) : title_(traits.title), width_(traits.width), height_(traits.height)
+#include <raylib.h>
+
+namespace bt::raylib
 {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(width_, height_, title_.c_str());
-}
+    Window::Window(const Traits& traits)
+    {
+        SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+        InitWindow(traits.width, traits.height, traits.title.c_str());
 
-Window::~Window()
-{
-    CloseWindow();
-}
+        if (!IsWindowReady())
+        {
+            throw std::runtime_error{"failed to create window"};
+        }
+    }
 
-auto Window::shouldClose() const -> bool
-{
-    return WindowShouldClose();
-}
-
-auto Window::begin(Color clear) const -> void
-{
-    BeginDrawing();
-    ClearBackground(clear);
-}
-
-auto Window::end() const -> void
-{
-    EndDrawing();
-    PollInputEvents();
-    SwapScreenBuffer();
-}
-
-auto Window::size() const -> Vector2
-{
-    const auto w = static_cast<float>(GetScreenWidth());
-    const auto h = static_cast<float>(GetScreenHeight());
-
-    return Vector2{.x = w, .y = h};
+    Window::~Window()
+    {
+        CloseWindow();
+    }
 }

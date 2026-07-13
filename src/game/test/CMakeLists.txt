@@ -1,7 +1,8 @@
 find_package(GTest CONFIG REQUIRED)
 
 add_executable(briarthorn-test
-    Game.test.cpp
+    Clock.test.cpp
+    Sim.test.cpp
 )
 
 target_link_libraries(briarthorn-test

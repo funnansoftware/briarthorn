@@ -2,7 +2,7 @@ project(briarthorn-raylib)
 
 add_library(${PROJECT_NAME})
 
-target_sources(${PROJECT_NAME} PUBLIC
+target_sources(${PROJECT_NAME} PRIVATE
     Renderer.cpp
     Window.cpp
 )
@@ -18,6 +18,8 @@ endif()
 
 find_package(raylib CONFIG REQUIRED)
 
+# The graphics edge reads the game core (to draw it and record input) and owns the
+# graphics stack; both are PUBLIC so the app inherits them.
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         briarthorn-game
@@ -34,7 +36,3 @@ if(NOT EMSCRIPTEN AND NOT ANDROID)
             glfw
     )
 endif()
-
-# if(BUILD_TESTING AND NOT ANDROID AND NOT EMSCRIPTEN)
-#     add_subdirectory(test)
-# endif()
