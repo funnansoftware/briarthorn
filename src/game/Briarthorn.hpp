@@ -33,12 +33,14 @@ namespace bt
         // across the middle, centered and scaled to the window.
         [[nodiscard]] auto triangle() const -> Triangle;
 
+        auto addSystem(std::unique_ptr<bt::game::System> x) -> void;
+
         // Opens the window and drives the render loop until it is closed.
         // Throws std::runtime_error if the window cannot be created.
         auto run() const -> void;
 
     private:
-        std::vector<std::unique_ptr<System>> systems_;
+        std::vector<std::unique_ptr<bt::game::System>> systems_;
         WindowSize size_;
         std::string title_;
     };

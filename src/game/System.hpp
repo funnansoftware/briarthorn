@@ -1,11 +1,12 @@
 #pragma once
 
-namespace bt
+namespace bt::game
 {
     /// @brief Abstract base class for all game systems.
     class System
     {
     public:
+        System() = default;
         virtual ~System() = default;
         System(const System&) = delete;
         auto operator=(const System&) -> System& = delete;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <raylib.h>
 #include <string>
 
 namespace bt::raylib
@@ -16,6 +17,12 @@ namespace bt::raylib
 
         Window(const Traits& traits);
         ~Window();
+
+        auto shouldClose() const -> bool;
+
+        auto begin(Color clear) const -> void;
+        auto end() const -> void;
+        auto size() const -> Vector2;
 
     private:
         std::string title_;

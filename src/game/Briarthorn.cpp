@@ -42,6 +42,11 @@ auto Briarthorn::triangle() const -> Triangle
     };
 }
 
+auto Briarthorn::addSystem(std::unique_ptr<bt::game::System> x) -> void
+{
+    systems_.emplace_back(std::move(x));
+}
+
 auto Briarthorn::run() const -> void
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
