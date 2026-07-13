@@ -4,21 +4,20 @@
 
 #include <raylib.h>
 
-namespace bt::raylib
+using bt::raylib::Window;
+
+Window::Window(const Traits& traits)
 {
-    Window::Window(const Traits& traits)
-    {
-        SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-        InitWindow(traits.width, traits.height, traits.title.c_str());
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(traits.width, traits.height, traits.title.c_str());
 
-        if (!IsWindowReady())
-        {
-            throw std::runtime_error{"failed to create window"};
-        }
-    }
-
-    Window::~Window()
+    if (!IsWindowReady())
     {
-        CloseWindow();
+        throw std::runtime_error{"failed to create window"};
     }
+}
+
+Window::~Window()
+{
+    CloseWindow();
 }

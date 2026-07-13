@@ -1,9 +1,8 @@
 #include <game/Entity.hpp>
 
-namespace bt::game
+using bt::game::Entity;
+
+auto Entity::topSpeed() const -> float
 {
-    auto Entity::topSpeed() const -> float
-    {
-        return topSpeedBase * speedBoost;
-    }
+    return topSpeedBase * speedBoost;
 }

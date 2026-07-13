@@ -1,73 +1,74 @@
 #include <game/World.hpp>
 
-namespace bt::game
+using bt::game::Entity;
+using bt::game::EntityId;
+using bt::game::World;
+
+auto World::spawn(Entity entity) -> EntityId
 {
-    auto World::spawn(Entity entity) -> EntityId
+    const EntityId id = nextId_++;
+    if (nextId_ == NullEntity)
     {
-        const EntityId id = nextId_++;
-        if (nextId_ == NullEntity)
+        nextId_ = 1; // never hand out the null id after a 32-bit wrap
+    }
+    entity.id = id;
+    entities_.push_back(entity);
+    return id;
+}
+
+auto World::despawn(EntityId id) -> bool
+{
+    for (auto it = entities_.begin(); it != entities_.end(); ++it)
+    {
+        if (it->id == id)
         {
-            nextId_ = 1; // never hand out the null id after a 32-bit wrap
+            entities_.erase(it);
+            return true;
         }
-        entity.id = id;
-        entities_.push_back(entity);
-        return id;
     }
+    return false;
+}
 
-    auto World::despawn(EntityId id) -> bool
+auto World::find(EntityId id) -> Entity*
+{
+    for (auto& entity : entities_)
     {
-        for (auto it = entities_.begin(); it != entities_.end(); ++it)
+        if (entity.id == id)
         {
-            if (it->id == id)
-            {
-                entities_.erase(it);
-                return true;
-            }
+            return &entity;
         }
-        return false;
     }
+    return nullptr;
+}
 
-    auto World::find(EntityId id) -> Entity*
+auto World::find(EntityId id) const -> const Entity*
+{
+    for (const auto& entity : entities_)
     {
-        for (auto& entity : entities_)
+        if (entity.id == id)
         {
-            if (entity.id == id)
-            {
-                return &entity;
-            }
+            return &entity;
         }
-        return nullptr;
     }
+    return nullptr;
+}
 
-    auto World::find(EntityId id) const -> const Entity*
-    {
-        for (const auto& entity : entities_)
-        {
-            if (entity.id == id)
-            {
-                return &entity;
-            }
-        }
-        return nullptr;
-    }
+auto World::entities() -> std::vector<Entity>&
+{
+    return entities_;
+}
 
-    auto World::entities() -> std::vector<Entity>&
-    {
-        return entities_;
-    }
+auto World::entities() const -> const std::vector<Entity>&
+{
+    return entities_;
+}
 
-    auto World::entities() const -> const std::vector<Entity>&
-    {
-        return entities_;
-    }
+auto World::getPlayer() const -> EntityId
+{
+    return player_;
+}
 
-    auto World::player() const -> EntityId
-    {
-        return player_;
-    }
-
-    auto World::setPlayer(EntityId id) -> void
-    {
-        player_ = id;
-    }
+auto World::setPlayer(EntityId id) -> void
+{
+    player_ = id;
 }

@@ -32,7 +32,7 @@ namespace bt::game
         [[nodiscard]] auto entities() const -> const std::vector<Entity>&;
 
         /// The entity the world revolves around (ownship); NullEntity if none.
-        [[nodiscard]] auto player() const -> EntityId;
+        [[nodiscard]] auto getPlayer() const -> EntityId;
         auto setPlayer(EntityId id) -> void;
 
     private:
