@@ -18,10 +18,11 @@ namespace bt::raylib
     inline constexpr auto DefaultWindowWidth = 800;
     inline constexpr auto DefaultWindowHeight = 600;
 
-    /// The raylib graphics surface attached to a Briarthorn. It owns the window
-    /// and implements bt::game::Graphics: it presents the world (ownship-centred,
-    /// 1 px = 1 m) and reads the keyboard into the command buffer. The concrete
-    /// `graphics` a headless Briarthorn does without.
+    /// @brief The raylib graphics surface attached to a Briarthorn.
+    ///
+    /// It owns the window and implements bt::game::Graphics: it presents the world
+    /// (ownship-centred, 1 px = 1 m) and reads the keyboard into the command buffer.
+    /// The concrete `graphics` a headless Briarthorn does without.
     class Renderer : public bt::game::Graphics
     {
     public:

@@ -9,11 +9,12 @@ namespace bt::game
 {
     class World;
 
-    /// The single, deferred seam for controller-driven state changes. Controllers
-    /// — device input, AI drivers, UI — never write entity fields directly; they
-    /// RECORD intent here, and the game loop drains the buffer with [flush] at
-    /// each fixed tick, before the systems run. That keeps every controller
-    /// mutation ordered, deterministic and replay-friendly, and confines
+    /// @brief The single, deferred seam for controller-driven state changes.
+    ///
+    /// Controllers — device input, AI drivers, UI — never write entity fields
+    /// directly; they RECORD intent here, and the game loop drains the buffer with
+    /// flush() at each fixed tick, before the systems run. That keeps every
+    /// controller mutation ordered, deterministic and replay-friendly, and confines
     /// structural changes (despawns) to the tick boundary. Systems remain the
     /// authoritative tick-time mutators — they write fields directly in step();
     /// this governs the controller tier only. The C++ evolution of
@@ -29,11 +30,14 @@ namespace bt::game
         auto damage(EntityId entity, float amount) -> void;
         auto despawn(EntityId entity) -> void;
 
-        /// Record an already-built command (the generic escape hatch).
+        /// @brief Record an already-built command (the generic escape hatch).
+        /// @param command The already-built command to record.
         auto record(const Command& command) -> void;
 
-        /// Apply every recorded command to [world], in record order, then clear.
+        /// @brief Apply every recorded command to @p world, in record order, then clear.
+        ///
         /// A command whose entity no longer exists is skipped.
+        /// @param world The world to apply the recorded commands to.
         auto flush(World& world) -> void;
 
         [[nodiscard]] auto empty() const -> bool;

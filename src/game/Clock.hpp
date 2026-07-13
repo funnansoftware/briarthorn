@@ -18,21 +18,27 @@ namespace bt::game
         auto setMaxSteps(int x) -> void;
         [[nodiscard]] auto getMaxSteps() const -> int;
 
-        /// Re-stamp "now" and drop any banked time — call it the moment real-time
-        /// stepping begins (e.g. after the window opens), so slow start-up work is
-        /// not folded into the first frame as a catch-up burst.
+        /// @brief Re-stamp "now" and drop any banked time — call it the moment
+        /// real-time stepping begins (e.g. after the window opens), so slow
+        /// start-up work is not folded into the first frame as a catch-up burst.
         auto reset() -> void;
 
-        /// Sample the monotonic clock, fold the elapsed real time into the
-        /// accumulator, and return how many fixed steps are now due (0..maxSteps).
+        /// @brief Sample the monotonic clock and fold the elapsed real time into
+        /// the accumulator.
+        /// @return How many fixed steps are now due (0..maxSteps).
         auto tick() -> int;
 
-        /// Fold an explicit elapsed duration in — the testable core of tick(),
-        /// and the seam for driving the clock from a fixed source in tests.
+        /// @brief Fold an explicit elapsed duration in.
+        ///
+        /// The testable core of tick(), and the seam for driving the clock from a
+        /// fixed source in tests.
+        /// @param elapsed The explicit elapsed duration to fold in.
+        /// @return How many fixed steps are now due (0..maxSteps).
         auto advance(Duration elapsed) -> int;
 
-        /// How far (0..1) into the next step the accumulator sits — the blend
-        /// factor a renderer can use to interpolate between the last two states.
+        /// @brief How far (0..1) into the next step the accumulator sits.
+        /// @return The blend factor a renderer can use to interpolate between the
+        /// last two states.
         [[nodiscard]] auto alpha() const -> float;
 
     private:

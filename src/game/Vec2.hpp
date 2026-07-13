@@ -2,10 +2,11 @@
 
 namespace bt::game
 {
-    /// A 2D vector in world space (metres). The simulation carries its own vector
-    /// type so `game/` stays free of raylib — the render layer converts it to a
-    /// raylib Vector2 at the edge. Axes follow the Geo convention: +x is east, +y
-    /// is south (screen-down).
+    /// @brief A 2D vector in world space (metres).
+    ///
+    /// The simulation carries its own vector type so `game/` stays free of raylib —
+    /// the render layer converts it to a raylib Vector2 at the edge. Axes follow the
+    /// Geo convention: +x is east, +y is south (screen-down).
     struct Vec2
     {
         float x{0.0F};
