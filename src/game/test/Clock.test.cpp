@@ -13,7 +13,7 @@ namespace
 
     TEST(ClockTest, FixedSecondsReportsTheStep)
     {
-        Clock clock{};
+        auto clock = Clock{};
         clock.setInterval(Duration{milliseconds{10}});
 
         EXPECT_NEAR(clock.getInterval().toSeconds().count(), 0.01F, 1e-6F);
@@ -21,7 +21,7 @@ namespace
 
     TEST(ClockTest, AdvanceReleasesWholeSteps)
     {
-        Clock clock{};
+        auto clock = Clock{};
         clock.setInterval(Duration{milliseconds{100}});
 
         EXPECT_EQ(clock.advance(Duration{milliseconds{250}}), 2); // -> two steps, 50 ms banked
@@ -31,7 +31,7 @@ namespace
 
     TEST(ClockTest, AlphaExposesTheBankedRemainder)
     {
-        Clock clock{};
+        auto clock = Clock{};
         clock.setInterval(Duration{milliseconds{100}});
         clock.advance(Duration{milliseconds{50}});
 
@@ -40,7 +40,7 @@ namespace
 
     TEST(ClockTest, SetIntervalChangesTheRate)
     {
-        Clock clock{};
+        auto clock = Clock{};
         clock.setInterval(Duration{milliseconds{100}});
         EXPECT_EQ(clock.advance(Duration{milliseconds{100}}), 1); // one 100 ms step
 
@@ -50,7 +50,7 @@ namespace
 
     TEST(ClockTest, AdvanceCapsRunawayCatchUp)
     {
-        Clock clock{};
+        auto clock = Clock{};
         clock.setInterval(Duration{milliseconds{100}});
         clock.setMaxSteps(3); // at most three steps per advance
 

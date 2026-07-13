@@ -32,7 +32,7 @@ auto Clock::reset() -> void
 auto Clock::tick() -> int
 {
     const auto now = std::chrono::steady_clock::now();
-    const Duration elapsed{now - last_};
+    const auto elapsed = Duration{now - last_};
     last_ = now;
     return advance(elapsed);
 }
@@ -41,7 +41,7 @@ auto Clock::advance(Duration elapsed) -> int
 {
     accumulate_ += elapsed;
 
-    int steps = 0;
+    auto steps = 0;
     while (accumulate_ >= interval_ && steps < maxSteps_)
     {
         accumulate_ -= interval_;

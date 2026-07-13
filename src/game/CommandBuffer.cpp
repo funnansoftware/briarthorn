@@ -124,7 +124,7 @@ auto CommandBuffer::flush(World& world) -> void
                 }
                 else
                 {
-                    Entity* entity = world.find(payload.entity);
+                    auto* entity = world.find(payload.entity);
                     if (entity != nullptr)
                     {
                         apply(*entity, payload);

@@ -27,7 +27,7 @@ namespace
 
     TEST(DurationTest, AddAndSubtractAccumulate)
     {
-        Duration total{};
+        auto total = Duration{};
         total += Duration{std::chrono::milliseconds{150}};
         total += Duration{std::chrono::milliseconds{150}};
         total -= Duration{std::chrono::milliseconds{100}};
@@ -39,7 +39,7 @@ namespace
 
     TEST(WorldTest, SpawnAssignsUniqueIdsAndFindsThem)
     {
-        World world;
+        auto world = World{};
         const auto first = world.spawn(Entity{});
         const auto second = world.spawn(Entity{});
 
@@ -51,7 +51,7 @@ namespace
 
     TEST(WorldTest, DespawnRemovesTheEntity)
     {
-        World world;
+        auto world = World{};
         const auto id = world.spawn(Entity{});
 
         EXPECT_TRUE(world.despawn(id));
@@ -61,10 +61,10 @@ namespace
 
     TEST(CommandBufferTest, FlushAppliesClampedIntentThenClears)
     {
-        World world;
+        auto world = World{};
         const auto id = world.spawn(Entity{});
 
-        CommandBuffer commands;
+        auto commands = CommandBuffer{};
         commands.throttle(id, 5.0F); // over-range -> clamps to 1
         commands.steer(id, -3.0F);   // under-range -> clamps to -1
         EXPECT_EQ(commands.size(), 2U);
@@ -78,12 +78,12 @@ namespace
 
     TEST(CommandBufferTest, DamageIsAppliedAndFloorsAtZero)
     {
-        World world;
-        Entity entity{};
+        auto world = World{};
+        auto entity = Entity{};
         entity.health = 30.0F;
         const auto id = world.spawn(entity);
 
-        CommandBuffer commands;
+        auto commands = CommandBuffer{};
         commands.damage(id, 100.0F);
         commands.flush(world);
 
@@ -92,10 +92,10 @@ namespace
 
     TEST(CommandBufferTest, CommandsNamingADespawnedEntityAreSkipped)
     {
-        World world;
+        auto world = World{};
         const auto id = world.spawn(Entity{});
 
-        CommandBuffer commands;
+        auto commands = CommandBuffer{};
         commands.despawn(id);
         commands.throttle(id, 1.0F); // applied after the despawn -> a safe no-op
 
@@ -107,16 +107,16 @@ namespace
 
     TEST(MovementTest, ThrottleAcceleratesAlongHeading)
     {
-        World world;
-        Entity entity{};
+        auto world = World{};
+        auto entity = Entity{};
         entity.heading = 90.0F; // due east: +x
         entity.commandedThrottle = 1.0F;
         const auto id = world.spawn(entity);
 
-        Movement movement;
+        auto movement = Movement{};
         movement.step(world, 1.0F); // one second
 
-        const Entity* out = world.find(id);
+        const auto* out = world.find(id);
         ASSERT_NE(out, nullptr);
         EXPECT_GT(out->speed, 0.0F);
         EXPECT_GT(out->position.x, 0.0F);          // moved east
@@ -125,13 +125,13 @@ namespace
 
     TEST(MovementTest, SteerTurnsWithinTheRate)
     {
-        World world;
-        Entity entity{};
+        auto world = World{};
+        auto entity = Entity{};
         entity.commandedSteer = 1.0F; // full right
         entity.maxTurnRate = 90.0F;
         const auto id = world.spawn(entity);
 
-        Movement movement;
+        auto movement = Movement{};
         movement.step(world, 0.5F);
 
         EXPECT_FLOAT_EQ(world.find(id)->heading, 45.0F); // 90 deg/s * 0.5 s

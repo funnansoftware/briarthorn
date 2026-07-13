@@ -7,7 +7,7 @@
 namespace bt::game
 {
     // Avoid spiral of death in the fixed-timestep simulation by using a cap on the maximum number of steps per frame.
-    inline constexpr int DefaultMaxSteps = 8;
+    inline constexpr auto DefaultMaxSteps = 8;
 
     class Clock
     {

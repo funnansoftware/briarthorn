@@ -13,10 +13,10 @@ using bt::raylib::Renderer;
 namespace
 {
     // Marker geometry (metres): a small triangle pointing along the heading.
-    constexpr float MarkerNose = 12.0F;
-    constexpr float MarkerTail = 9.0F;
-    constexpr float MarkerTailAngle = 140.0F; // heading offset to each tail corner (deg)
-    constexpr float Half = 0.5F;
+    constexpr auto MarkerNose = 12.0F;
+    constexpr auto MarkerTail = 9.0F;
+    constexpr auto MarkerTailAngle = 140.0F; // heading offset to each tail corner (deg)
+    constexpr auto Half = 0.5F;
 
     [[nodiscard]] auto toScreen(bt::game::Vec2 world, bt::game::Vec2 camera, Vector2 center) -> Vector2
     {
@@ -25,9 +25,9 @@ namespace
 
     auto drawMarker(const bt::game::Entity& entity, bt::game::Vec2 camera, Vector2 center, Color color) -> void
     {
-        const bt::game::Vec2 nose = entity.position + bt::game::Geo::offset(entity.heading, MarkerNose);
-        const bt::game::Vec2 tailLeft = entity.position + bt::game::Geo::offset(entity.heading - MarkerTailAngle, MarkerTail);
-        const bt::game::Vec2 tailRight = entity.position + bt::game::Geo::offset(entity.heading + MarkerTailAngle, MarkerTail);
+        const auto nose = entity.position + bt::game::Geo::offset(entity.heading, MarkerNose);
+        const auto tailLeft = entity.position + bt::game::Geo::offset(entity.heading - MarkerTailAngle, MarkerTail);
+        const auto tailRight = entity.position + bt::game::Geo::offset(entity.heading + MarkerTailAngle, MarkerTail);
 
         // Vertex order (nose, left, right) matches the fill winding raylib used
         // for the original hello-triangle in this screen's y-down space.
@@ -55,11 +55,11 @@ auto Renderer::pollInput(bt::game::CommandBuffer& commands, bt::game::EntityId p
         return;
     }
 
-    const bool forward = IsKeyDown(KEY_W) || IsKeyDown(KEY_UP);
-    const bool backward = IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN);
-    const bool left = IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT);
-    const bool right = IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT);
-    const bool boost = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+    const auto forward = IsKeyDown(KEY_W) || IsKeyDown(KEY_UP);
+    const auto backward = IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN);
+    const auto left = IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT);
+    const auto right = IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT);
+    const auto boost = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
 
     commands.throttle(player, forward ? 1.0F : 0.0F);
     commands.brake(player, backward ? 1.0F : 0.0F);
@@ -72,18 +72,18 @@ auto Renderer::render(const bt::game::World& world) -> void
     BeginDrawing();
     ClearBackground(DARKGRAY);
 
-    const Vector2 center{.x = static_cast<float>(GetScreenWidth()) * Half, .y = static_cast<float>(GetScreenHeight()) * Half};
+    const auto center = Vector2{.x = static_cast<float>(GetScreenWidth()) * Half, .y = static_cast<float>(GetScreenHeight()) * Half};
 
     // Ownship-centred camera: the player (if any) sits at screen centre.
-    bt::game::Vec2 camera{};
-    if (const bt::game::Entity* found = world.find(world.getPlayer()); found != nullptr)
+    auto camera = bt::game::Vec2{};
+    if (const auto* found = world.find(world.getPlayer()); found != nullptr)
     {
         camera = found->position;
     }
 
     for (const auto& entity : world.entities())
     {
-        const Color color = (entity.id == world.getPlayer()) ? ORANGE : SKYBLUE;
+        const auto color = (entity.id == world.getPlayer()) ? ORANGE : SKYBLUE;
         drawMarker(entity, camera, center, color);
     }
 

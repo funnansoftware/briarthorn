@@ -15,8 +15,8 @@ namespace bt::game
 
 namespace bt::raylib
 {
-    inline constexpr int DefaultWindowWidth = 800;
-    inline constexpr int DefaultWindowHeight = 600;
+    inline constexpr auto DefaultWindowWidth = 800;
+    inline constexpr auto DefaultWindowHeight = 600;
 
     /// The raylib graphics surface attached to a Briarthorn. It owns the window
     /// and implements bt::game::Graphics: it presents the world (ownship-centred,

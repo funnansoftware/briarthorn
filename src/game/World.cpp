@@ -6,7 +6,7 @@ using bt::game::World;
 
 auto World::spawn(Entity entity) -> EntityId
 {
-    const EntityId id = nextId_++;
+    const auto id = nextId_++;
     if (nextId_ == NullEntity)
     {
         nextId_ = 1; // never hand out the null id after a 32-bit wrap

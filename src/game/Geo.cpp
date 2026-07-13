@@ -8,14 +8,14 @@ using bt::game::Vec2;
 
 namespace
 {
-    constexpr float DegreesPerCircle = 360.0F;
-    constexpr float StraightAngle = 180.0F;
-    constexpr float RadiansPerDegree = std::numbers::pi_v<float> / StraightAngle;
+    constexpr auto DegreesPerCircle = 360.0F;
+    constexpr auto StraightAngle = 180.0F;
+    constexpr auto RadiansPerDegree = std::numbers::pi_v<float> / StraightAngle;
 }
 
 auto Geo::wrap360(float deg) -> float
 {
-    const float wrapped = std::fmod(deg, DegreesPerCircle);
+    const auto wrapped = std::fmod(deg, DegreesPerCircle);
     return wrapped < 0.0F ? wrapped + DegreesPerCircle : wrapped;
 }
 

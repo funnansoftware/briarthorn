@@ -17,7 +17,7 @@
 namespace bt
 {
     // The default fixed simulation step: 10 ms (i.e. 100 steps per second).
-    inline constexpr game::Duration DefaultStepInterval{std::chrono::milliseconds{10}};
+    inline constexpr auto DefaultStepInterval = game::Duration{std::chrono::milliseconds{10}};
 
     /// The owning object of the app and its state: the world, the ordered systems,
     /// the fixed-timestep clock and the command buffer. It runs headless — the

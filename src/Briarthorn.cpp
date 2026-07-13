@@ -14,10 +14,10 @@ using bt::Briarthorn;
 namespace
 {
     // Demo scaffolding: two static reference markers around the origin (metres).
-    constexpr float MarkerNorthX = 120.0F;
-    constexpr float MarkerNorthY = -80.0F;
-    constexpr float MarkerSouthX = -160.0F;
-    constexpr float MarkerSouthY = 120.0F;
+    constexpr auto MarkerNorthX = 120.0F;
+    constexpr auto MarkerNorthY = -80.0F;
+    constexpr auto MarkerSouthX = -160.0F;
+    constexpr auto MarkerSouthY = 120.0F;
 }
 
 Briarthorn::Briarthorn()
@@ -41,13 +41,13 @@ auto Briarthorn::buildWorld() -> void
 {
     // Ownship at the origin, plus a couple of static markers so the
     // ownship-centred camera has fixed references to fly against.
-    const game::Entity ownship{};
+    const auto ownship = game::Entity{};
     world_.setPlayer(world_.spawn(ownship));
 
-    const game::Entity north{.position = game::Vec2{.x = MarkerNorthX, .y = MarkerNorthY}};
+    const auto north = game::Entity{.position = game::Vec2{.x = MarkerNorthX, .y = MarkerNorthY}};
     world_.spawn(north);
 
-    const game::Entity south{.position = game::Vec2{.x = MarkerSouthX, .y = MarkerSouthY}};
+    const auto south = game::Entity{.position = game::Vec2{.x = MarkerSouthX, .y = MarkerSouthY}};
     world_.spawn(south);
 }
 
@@ -55,10 +55,10 @@ auto Briarthorn::step() -> void
 {
     // Fold the real time elapsed since the last call into the chrono clock; it
     // returns how many fixed steps are now due (0..maxSteps).
-    const int steps = clock_.tick();
+    const auto steps = clock_.tick();
     const auto dt = clock_.getInterval().toSeconds();
 
-    for (int i = 0; i < steps; ++i)
+    for (auto i = 0; i < steps; ++i)
     {
         // Controller tier first (apply this tick's recorded intent), then the
         // authoritative systems integrate it.

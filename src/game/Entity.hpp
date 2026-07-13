@@ -11,13 +11,13 @@ namespace bt::game
     /// entity the way a reused vector index would.
     using EntityId = std::uint32_t;
 
-    inline constexpr EntityId NullEntity = 0;
+    inline constexpr auto NullEntity = EntityId{0};
 
     // Default capability ceilings for a bare entity. Flat values for now; the
     // full port derives these from stats via GameRules.
-    inline constexpr float DefaultTopSpeed = 180.0F;        // m/s
-    inline constexpr float DefaultTurnRate = 90.0F;         // deg/s
-    inline constexpr float DefaultMaxAcceleration = 120.0F; // m/s^2
+    inline constexpr auto DefaultTopSpeed = 180.0F;        // m/s
+    inline constexpr auto DefaultTurnRate = 90.0F;         // deg/s
+    inline constexpr auto DefaultMaxAcceleration = 120.0F; // m/s^2
 
     /// Ground-truth state for one moving object in the world: a position, a
     /// heading, the kinematic state, and the control inputs a controller sets

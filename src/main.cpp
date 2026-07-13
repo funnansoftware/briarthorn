@@ -7,7 +7,7 @@
 auto main() -> int
 try
 {
-    bt::Briarthorn briarthorn;
+    auto briarthorn = bt::Briarthorn{};
 
     // Enable graphics (opens the window). Drop this line and the same Briarthorn
     // runs headless.
