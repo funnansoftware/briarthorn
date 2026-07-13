@@ -88,18 +88,40 @@ auto Briarthorn::commands() -> game::CommandBuffer&
 
 auto Briarthorn::run() -> void
 {
-    if (!graphics_)
-    {
-        return; // headless: there is no window loop to drive
-    }
+    // Start real-time stepping now — after any window has opened — so slow start-up
+    // work isn't folded into the first frame as a catch-up burst.
+    clock_.reset();
+    running_ = true;
 
-    clock_.reset(); // start real-time stepping now, after the window has opened
-    while (!graphics_->shouldClose())
+    while (running_)
     {
-        // Sample device input once per frame; step() flushes and consumes it at
-        // the next fixed tick boundary.
-        graphics_->pollInput(commands_, world_.getPlayer());
+        // A closed window ends the loop; headless, nothing asks to close, so run()
+        // keeps going until stop().
+        if (graphics_ && graphics_->shouldClose())
+        {
+            running_ = false;
+            break;
+        }
+
+        // Sample device input once per frame (graphics only); step() flushes and
+        // consumes it at the next fixed tick boundary.
+        if (graphics_)
+        {
+            graphics_->pollInput(commands_, world_.getPlayer());
+        }
+
+        // The simulation advances on its own fixed clock, decoupled from graphics.
         step();
-        graphics_->render(world_);
+
+        // Render the freshly stepped world, after the fixed steps have run.
+        if (graphics_)
+        {
+            graphics_->render(world_);
+        }
     }
+}
+
+auto Briarthorn::stop() -> void
+{
+    running_ = false;
 }

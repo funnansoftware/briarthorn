@@ -48,10 +48,16 @@ namespace bt
         /// needed — the headless entry point.
         auto step() -> void;
 
-        /// Run the interactive loop until the window closes: each frame, poll input,
-        /// advance the sim by the elapsed number of fixed steps, and render. Returns
-        /// immediately if graphics have not been enabled.
+        /// Drive the loop until stopped: each iteration advances the simulation by the
+        /// fixed steps now due (step(), on its own clock) and — when graphics are
+        /// enabled — polls input before and renders after. Runs headless too, with no
+        /// window and no render. Ends when the window closes or stop() is called, and
+        /// is safe to call again afterwards.
         auto run() -> void;
+
+        /// Ask run()'s loop to finish after the current iteration. The window's close
+        /// button does this on its own; call it to end a headless run.
+        auto stop() -> void;
 
         [[nodiscard]] auto world() -> game::World&;
         [[nodiscard]] auto world() const -> const game::World&;
@@ -65,5 +71,6 @@ namespace bt
         std::vector<std::unique_ptr<game::System>> systems_;
         game::Clock clock_;
         std::optional<raylib::Renderer> graphics_;
+        bool running_{false};
     };
 }
