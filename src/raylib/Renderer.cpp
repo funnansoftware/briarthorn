@@ -2,6 +2,11 @@
 
 #include <raylib.h>
 
+#if defined(_WIN32)
+#define GLFW_INCLUDE_NONE // don't let GLFW pull in OpenGL headers alongside raylib
+#include <GLFW/glfw3.h>
+#endif
+
 #include <game/CommandBuffer.hpp>
 #include <game/Entity.hpp>
 #include <game/Geo.hpp>
@@ -41,6 +46,9 @@ Renderer::Renderer() : Renderer(Config{})
 
 Renderer::Renderer(const Config& config) : window_{{.title = config.title, .width = config.width, .height = config.height}}
 {
+#if defined(_WIN32)
+    installResizeRendering();
+#endif
 }
 
 auto Renderer::shouldClose() const -> bool
@@ -67,7 +75,7 @@ auto Renderer::pollInput(bt::game::CommandBuffer& commands, bt::game::EntityId p
     commands.boost(player, boost ? 1.0F : 0.0F);
 }
 
-auto Renderer::render(const bt::game::World& world) -> void
+auto Renderer::draw(const bt::game::World& world) -> void
 {
     BeginDrawing();
     ClearBackground(DARKGRAY);
@@ -88,6 +96,69 @@ auto Renderer::render(const bt::game::World& world) -> void
     }
 
     EndDrawing();
+}
+
+auto Renderer::render(const bt::game::World& world) -> void
+{
+#if defined(_WIN32)
+    lastWorld_ = &world; // so the resize callbacks can repaint this same frame
+#endif
+    draw(world);
     PollInputEvents();
     SwapScreenBuffer();
 }
+
+#if defined(_WIN32)
+auto Renderer::presentDuringResize() -> void
+{
+    // Called from GLFW's callbacks while the Win32 modal resize/move loop spins.
+    // Repaint the last world at the current size and present it — deliberately
+    // WITHOUT PollInputEvents(), which would re-enter glfwPollEvents() recursively.
+    if (lastWorld_ == nullptr)
+    {
+        return;
+    }
+    draw(*lastWorld_);
+    SwapScreenBuffer();
+}
+
+void Renderer::onWindowRefresh(GLFWwindow* window)
+{
+    if (auto* self = static_cast<Renderer*>(glfwGetWindowUserPointer(window)); self != nullptr)
+    {
+        self->presentDuringResize();
+    }
+}
+
+void Renderer::onWindowResized(GLFWwindow* window, int width, int height)
+{
+    auto* self = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+    if (self == nullptr)
+    {
+        return;
+    }
+    // Let raylib update its own viewport/screen size for the new dimensions...
+    if (self->prevSizeCallback_ != nullptr)
+    {
+        self->prevSizeCallback_(window, width, height);
+    }
+    // ...then repaint at that new size so the window tracks the drag live.
+    self->presentDuringResize();
+}
+
+auto Renderer::installResizeRendering() -> void
+{
+    // raylib made its GLFW window current during InitWindow; that is the handle
+    // GLFW hands back here (raylib does not expose the GLFWwindow* directly).
+    auto* window = glfwGetCurrentContext();
+    if (window == nullptr)
+    {
+        return;
+    }
+    glfwSetWindowUserPointer(window, this);
+    // raylib leaves the refresh callback unused; the size callback is raylib's, so
+    // chain it (save the previous) rather than replace it.
+    glfwSetWindowRefreshCallback(window, &Renderer::onWindowRefresh);
+    prevSizeCallback_ = glfwSetWindowSizeCallback(window, &Renderer::onWindowResized);
+}
+#endif
