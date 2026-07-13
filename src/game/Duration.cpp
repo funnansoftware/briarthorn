@@ -7,23 +7,23 @@ namespace bt::game
 {
     auto Duration::toSeconds() const -> std::chrono::duration<float>
     {
-        return value_;
+        return duration_;
     }
 
     auto Duration::operator+=(Duration other) noexcept -> Duration&
     {
-        value_ += other.value_;
+        duration_ += other.duration_;
         return *this;
     }
 
     auto Duration::operator-=(Duration other) noexcept -> Duration&
     {
-        value_ -= other.value_;
+        duration_ -= other.duration_;
         return *this;
     }
 
     auto Duration::operator<=>(Duration other) const noexcept -> std::partial_ordering
     {
-        return value_ <=> other.value_;
+        return duration_ <=> other.duration_;
     }
 }
