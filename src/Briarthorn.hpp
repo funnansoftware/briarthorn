@@ -30,7 +30,7 @@ namespace bt
     class Briarthorn
     {
     public:
-        explicit Briarthorn(game::Duration step = DefaultStepInterval);
+        explicit Briarthorn();
 
         /// Set the fixed simulation step interval (e.g. `game::Duration{std::chrono::
         /// milliseconds{5}}`). Takes effect on the next step().

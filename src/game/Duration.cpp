@@ -3,27 +3,26 @@
 #include <chrono>
 #include <compare>
 
-namespace bt::game
+using bt::game::Duration;
+
+auto Duration::toSeconds() const -> Seconds
 {
-    auto Duration::toSeconds() const -> std::chrono::duration<float>
-    {
-        return duration_;
-    }
+    return duration_;
+}
 
-    auto Duration::operator+=(Duration other) noexcept -> Duration&
-    {
-        duration_ += other.duration_;
-        return *this;
-    }
+auto Duration::operator+=(Duration other) noexcept -> Duration&
+{
+    duration_ += other.duration_;
+    return *this;
+}
 
-    auto Duration::operator-=(Duration other) noexcept -> Duration&
-    {
-        duration_ -= other.duration_;
-        return *this;
-    }
+auto Duration::operator-=(Duration other) noexcept -> Duration&
+{
+    duration_ -= other.duration_;
+    return *this;
+}
 
-    auto Duration::operator<=>(Duration other) const noexcept -> std::partial_ordering
-    {
-        return duration_ <=> other.duration_;
-    }
+auto Duration::operator<=>(Duration other) const noexcept -> std::partial_ordering
+{
+    return duration_ <=> other.duration_;
 }

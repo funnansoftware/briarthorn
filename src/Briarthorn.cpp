@@ -20,7 +20,7 @@ namespace bt
         constexpr float MarkerSouthY = 120.0F;
     }
 
-    Briarthorn::Briarthorn(game::Duration step) : clock_{step}
+    Briarthorn::Briarthorn()
     {
         buildWorld();
         systems_.push_back(std::make_unique<game::Movement>());
@@ -55,15 +55,17 @@ namespace bt
         // Fold the real time elapsed since the last call into the chrono clock; it
         // returns how many fixed steps are now due (0..maxSteps).
         const int steps = clock_.tick();
-        const float dt = clock_.fixedSeconds();
+        const auto dt = clock_.getInterval().toSeconds();
+
         for (int i = 0; i < steps; ++i)
         {
             // Controller tier first (apply this tick's recorded intent), then the
             // authoritative systems integrate it.
             commands_.flush(world_);
+
             for (const auto& system : systems_)
             {
-                system->step(world_, dt);
+                system->step(world_, dt.count());
             }
         }
     }

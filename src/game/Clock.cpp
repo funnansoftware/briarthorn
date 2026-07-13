@@ -1,62 +1,63 @@
 #include <game/Clock.hpp>
 
-namespace bt::game
+using bt::game::Clock;
+using bt::game::Duration;
+
+auto Clock::setInterval(Duration x) -> void
 {
-    Clock::Clock(Duration fixedStep, int maxSteps) : fixedStep_{fixedStep}, maxSteps_{maxSteps}, last_{Source::now()}
+    interval_ = x;
+}
+
+auto Clock::getInterval() const -> Duration
+{
+    return interval_;
+}
+
+auto Clock::setMaxSteps(int x) -> void
+{
+    maxSteps_ = x;
+}
+
+auto Clock::getMaxSteps() const -> int
+{
+    return maxSteps_;
+}
+
+auto Clock::reset() -> void
+{
+    last_ = std::chrono::steady_clock::now();
+    accumulate_ = Duration{};
+}
+
+auto Clock::tick() -> int
+{
+    const auto now = std::chrono::steady_clock::now();
+    const Duration elapsed{now - last_};
+    last_ = now;
+    return advance(elapsed);
+}
+
+auto Clock::advance(Duration elapsed) -> int
+{
+    accumulate_ += elapsed;
+
+    int steps = 0;
+    while (accumulate_ >= interval_ && steps < maxSteps_)
     {
+        accumulate_ -= interval_;
+        ++steps;
     }
 
-    auto Clock::setInterval(Duration fixedStep) -> void
+    // Drop any backlog beyond the cap so we don't perpetually chase it.
+    if (accumulate_ >= interval_)
     {
-        fixedStep_ = fixedStep;
+        accumulate_ = Duration{};
     }
 
-    auto Clock::interval() const -> Duration
-    {
-        return fixedStep_;
-    }
+    return steps;
+}
 
-    auto Clock::reset() -> void
-    {
-        last_ = Source::now();
-        accumulator_ = Duration{};
-    }
-
-    auto Clock::tick() -> int
-    {
-        const auto now = Source::now();
-        const Duration elapsed{now - last_};
-        last_ = now;
-        return advance(elapsed);
-    }
-
-    auto Clock::advance(Duration elapsed) -> int
-    {
-        accumulator_ += elapsed;
-
-        int steps = 0;
-        while (accumulator_ >= fixedStep_ && steps < maxSteps_)
-        {
-            accumulator_ -= fixedStep_;
-            ++steps;
-        }
-
-        // Drop any backlog beyond the cap so we don't perpetually chase it.
-        if (accumulator_ >= fixedStep_)
-        {
-            accumulator_ = Duration{};
-        }
-
-        return steps;
-    }
-
-    auto Clock::fixedSeconds() const -> float
-    {
-        return fixedStep_.toSeconds().count();
-    }
-
-    auto Clock::alpha() const -> float
-    {
-        return accumulator_.toSeconds() / fixedStep_.toSeconds();
-    }
+auto Clock::alpha() const -> float
+{
+    return accumulate_.toSeconds() / interval_.toSeconds();
 }
