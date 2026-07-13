@@ -4,5 +4,5 @@ using bt::game::Entity;
 
 auto Entity::topSpeed() const -> float
 {
-    return topSpeedBase * speedBoost;
+    return limits.topSpeed * speedBoost;
 }

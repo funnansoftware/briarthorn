@@ -6,8 +6,8 @@
 
 #include <game/World.hpp>
 
-using bt::game::CommandBuffer;
 using bt::game::Command;
+using bt::game::CommandBuffer;
 using bt::game::Damage;
 using bt::game::Despawn;
 using bt::game::Entity;
@@ -30,22 +30,22 @@ namespace
     // world, not an entity), so it needs no overload here.
     auto apply(Entity& entity, const SetThrottle& command) -> void
     {
-        entity.commandedThrottle = clamp01(command.position);
+        entity.controls.throttle = clamp01(command.position);
     }
 
     auto apply(Entity& entity, const SetBrake& command) -> void
     {
-        entity.commandedBrake = clamp01(command.position);
+        entity.controls.brake = clamp01(command.position);
     }
 
     auto apply(Entity& entity, const SetSteer& command) -> void
     {
-        entity.commandedSteer = std::clamp(command.amount, -1.0F, 1.0F);
+        entity.controls.steer = std::clamp(command.amount, -1.0F, 1.0F);
     }
 
     auto apply(Entity& entity, const SetBoost& command) -> void
     {
-        entity.commandedBoost = clamp01(command.level);
+        entity.controls.boost = clamp01(command.level);
     }
 
     auto apply(Entity& entity, const Damage& command) -> void

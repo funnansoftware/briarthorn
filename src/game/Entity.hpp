@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <game/Controls.hpp>
+#include <game/Limits.hpp>
 #include <game/Vec2.hpp>
 
 namespace bt::game
@@ -15,15 +17,10 @@ namespace bt::game
 
     inline constexpr auto NullEntity = EntityId{0};
 
-    // Default capability ceilings for a bare entity. Flat values for now; the
-    // full port derives these from stats via GameRules.
-    inline constexpr auto DefaultTopSpeed = 180.0F;        // m/s
-    inline constexpr auto DefaultTurnRate = 90.0F;         // deg/s
-    inline constexpr auto DefaultMaxAcceleration = 120.0F; // m/s^2
-
     /// @brief Ground-truth state for one moving object in the world: a position,
-    /// a heading, the kinematic state, and the control inputs a controller sets
-    /// (through the command buffer) for the movement system to integrate.
+    /// a heading, the kinematic state, plus the latched Controls a controller
+    /// sets (through the command buffer) and the Limits bounding what the
+    /// airframe can do.
     ///
     /// Pure state, no behaviour — systems write these, the renderer reads them. A
     /// trimmed port of `lib/sim/model/entity.dart`: kinematics only for now, with
@@ -37,24 +34,16 @@ namespace bt::game
         float heading{0.0F};      ///< degrees clockwise from north, [0, 360)
         float speed{0.0F};        ///< m/s
         float acceleration{0.0F}; ///< m/s^2 applied last tick (output only)
+        float speedBoost{1.0F};   ///< live top-speed multiplier movement derives
+                                  ///< from controls.boost (output only)
 
-        // Control inputs — the command buffer writes these, movement reads them.
-        float commandedThrottle{0.0F}; ///< 0..1
-        float commandedBrake{0.0F};    ///< 0..1
-        float commandedSteer{0.0F};    ///< -1..1
-        float commandedBoost{0.0F};    ///< 0..1 (afterburner intent)
-        float speedBoost{1.0F};        ///< live top-speed multiplier
-
-        // Capability ceilings the movement system reads. Flat fields for now; the
-        // full port derives these from stats via GameRules (Entity.topSpeed etc).
-        float topSpeedBase{DefaultTopSpeed}; ///< m/s at speedBoost == 1
-        float maxTurnRate{DefaultTurnRate};  ///< deg/s
-        float maxAcceleration{DefaultMaxAcceleration};
+        Controls controls{}; ///< latched controller intent, applied on flush
+        Limits limits{};     ///< capability ceilings; from stats/GameRules later
 
         float health{100.0F};
 
         /// @brief Top speed right now, with the afterburner multiplier folded in.
-        /// @return The current top speed, with the afterburner multiplier folded in.
+        /// @return limits.topSpeed scaled by the live speedBoost multiplier.
         [[nodiscard]] auto topSpeed() const -> float;
     };
 }
