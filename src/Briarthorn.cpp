@@ -51,7 +51,7 @@ auto Briarthorn::buildWorld() -> void
     world_.spawn(south);
 }
 
-auto Briarthorn::step() -> void
+auto Briarthorn::update() -> void
 {
     // Fold the real time elapsed since the last call into the chrono clock; it
     // returns how many fixed steps are now due (0..maxSteps).
@@ -66,7 +66,7 @@ auto Briarthorn::step() -> void
 
         for (const auto& system : systems_)
         {
-            system->step(world_, dt.count());
+            system->update(world_, dt.count());
         }
     }
 }
@@ -111,7 +111,7 @@ auto Briarthorn::run() -> void
         }
 
         // The simulation advances on its own fixed clock, decoupled from graphics.
-        step();
+        update();
 
         // Render the freshly stepped world, after the fixed steps have run.
         if (graphics_)

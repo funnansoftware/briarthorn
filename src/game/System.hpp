@@ -22,6 +22,6 @@ namespace bt::game
         System(System&&) noexcept = delete;
         auto operator=(System&&) noexcept -> System& = delete;
 
-        virtual auto step(World& world, float dt) -> void = 0;
+        virtual auto update(World& world, float dt) -> void = 0;
     };
 }

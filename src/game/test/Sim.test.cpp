@@ -114,7 +114,7 @@ namespace
         const auto id = world.spawn(entity);
 
         auto movement = Movement{};
-        movement.step(world, 1.0F); // one second
+        movement.update(world, 1.0F); // one second
 
         const auto* out = world.find(id);
         ASSERT_NE(out, nullptr);
@@ -132,7 +132,7 @@ namespace
         const auto id = world.spawn(entity);
 
         auto movement = Movement{};
-        movement.step(world, 0.5F);
+        movement.update(world, 0.5F);
 
         EXPECT_FLOAT_EQ(world.find(id)->heading, 45.0F); // 90 deg/s * 0.5 s
     }

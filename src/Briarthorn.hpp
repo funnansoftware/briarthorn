@@ -57,13 +57,13 @@ namespace bt
         /// last call and run every fixed step now due: for each, flush the command
         /// buffer then step every system.
         ///
-        /// Zero, one, or several steps may run, so the sim holds its fixed rate no
-        /// matter how often step() is called. No graphics needed — the headless entry
+        /// Zero, one, or several updates may run, so the sim holds its fixed rate no
+        /// matter how often update() is called. No graphics needed — the headless entry
         /// point.
-        auto step() -> void;
+        auto update() -> void;
 
         /// @brief Drive the loop until stopped: each iteration advances the
-        /// simulation by the fixed steps now due (step(), on its own clock) and —
+        /// simulation by the fixed updates now due (update(), on its own clock) and —
         /// when graphics are enabled — polls input before and renders after.
         ///
         /// Runs headless too, with no window and no render. Ends when the window

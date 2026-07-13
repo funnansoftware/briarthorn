@@ -17,7 +17,7 @@ namespace
     constexpr auto AfterburnerBoost = 1.6F;
 }
 
-auto Movement::step(World& world, float dt) -> void
+auto Movement::update(World& world, float dt) -> void
 {
     for (auto& entity : world.entities())
     {
