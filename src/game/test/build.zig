@@ -12,7 +12,16 @@ pub fn configure(c: *const Ctx, game: *std.Build.Step.Compile) void {
     const mod = c.module();
     // Only the test translation units: main() comes from gtest_main, and the
     // library code comes from linking briarthorn-game.
-    c.addSources(mod, "src/game/test", &.{"Game.test.cpp"});
+    c.addSources(mod, "src/game/test", &.{
+        "Clock.test.cpp",
+        "CommandBuffer.test.cpp",
+        "Duration.test.cpp",
+        "Entity.test.cpp",
+        "Geo.test.cpp",
+        "Heading.test.cpp",
+        "Movement.test.cpp",
+        "World.test.cpp",
+    });
 
     // target_link_libraries(briarthorn-test PRIVATE briarthorn-game GTest::gtest_main).
     // raylib/glfw/system libs are inherited from briarthorn-game; the test only

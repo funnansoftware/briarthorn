@@ -84,9 +84,10 @@ pub fn computeEnv(b: *std.Build, target: std.Build.ResolvedTarget, default_api: 
 }
 
 /// Finishes the app: links the app module (main.cpp + the fopen shim) and the
-/// briarthorn archive into a NativeActivity shared library, then packages it
-/// into an APK with the gradle project in android/.
-pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, briarthorn: *std.Build.Step.Compile) void {
+/// graphics-edge archive (which pulls the game core in transitively) into a
+/// NativeActivity shared library, then packages it into an APK with the gradle
+/// project in android/.
+pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, graphics: *std.Build.Step.Compile) void {
     const b = c.b;
     const a = c.android.?;
 
@@ -94,9 +95,9 @@ pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, briarthorn: *std.Bui
     // on the final module, not the library.
     app_mod.addCSourceFile(.{ .file = a.fopen_shim, .language = .c });
 
-    // target_link_libraries(app PRIVATE briarthorn), before raylib below:
-    // app -> briarthorn -> raylib.
-    app_mod.linkLibrary(briarthorn);
+    // target_link_libraries(app PRIVATE briarthorn-raylib), before raylib below:
+    // app -> raylib edge -> game core (transitive), then raylib.a.
+    app_mod.linkLibrary(graphics);
 
     app_mod.addLibraryPath(b.graph.cwdRelativePath(a.crt_dir));
     app_mod.addLibraryPath(b.graph.cwdRelativePath(a.lib_unversioned));

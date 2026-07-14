@@ -2,31 +2,22 @@
 #include <exception>
 #include <iostream>
 
-#include <game/Briarthorn.hpp>
+#include <Briarthorn.hpp>
 
 auto main() -> int
 try
 {
-    // Briarthorn bt;
-    // bt.entities
-    // bt.projection
-    // bt.commands
-    // bt.palette
-    // bt.systems.emplace_back(Missile);
-    // bt.systems.emplace_back(Radar);
-    // bt.systems.emplace_back(Collision);
-    // bt.graphics = std::make_unique<Raylib>();
-    // bt.graphics->addChild(std::make_unique<TrackView>());
-    // bt.graphics->render();
+    auto briarthorn = bt::Briarthorn{};
 
-    constexpr bt::WindowSize windowSize{.width = 800, .height = 600};
+    // Enable graphics (opens the window). Drop this line and the same Briarthorn
+    // runs headless.
+    briarthorn.initGraphics();
 
-    const bt::Briarthorn bt{windowSize, "Hello, Triangle"};
-    bt.run();
+    briarthorn.run();
 
     return EXIT_SUCCESS;
 }
-catch (const std::exception &error)
+catch (const std::exception& error)
 {
     std::cerr << "briarthorn: " << error.what() << '\n';
     return EXIT_FAILURE;

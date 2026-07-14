@@ -18,9 +18,9 @@ pub fn sysrootInclude(b: *std.Build) std.Build.LazyPath {
 }
 
 /// Finishes the app: compiles the app module (main.cpp) to a static library and
-/// links it with the briarthorn archive and raylib via emcc into the
-/// .html/.js/.wasm triple.
-pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, briarthorn: *std.Build.Step.Compile) void {
+/// links it with the graphics-edge archive, the game-core archive, and raylib
+/// via emcc into the .html/.js/.wasm triple.
+pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, game: *std.Build.Step.Compile, graphics: *std.Build.Step.Compile) void {
     const b = c.b;
     const em_root = resolveRoot(b);
 
@@ -46,9 +46,11 @@ pub fn finishApp(c: *const Ctx, app_mod: *std.Build.Module, briarthorn: *std.Bui
     // addFileArg registers it as an input so a shell edit re-runs emcc.
     emcc.addArg("--shell-file");
     emcc.addFileArg(b.path("web/shell.html"));
-    // app.a -> briarthorn.a -> raylib.a: each references symbols in the next.
+    // app.a -> briarthorn-raylib.a -> briarthorn-game.a -> raylib.a: each
+    // references symbols in the next (the single-pass link order emcc needs).
     emcc.addArtifactArg(lib);
-    emcc.addArtifactArg(briarthorn);
+    emcc.addArtifactArg(graphics);
+    emcc.addArtifactArg(game);
     emcc.addFileArg(b.path(b.pathJoin(&.{ c.lib_rel, "libraylib.a" })));
     emcc.addArg("-o");
     const html = emcc.addOutputFileArg(config.app_name ++ ".html");

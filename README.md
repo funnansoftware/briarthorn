@@ -1,6 +1,6 @@
 # briarthorn
 
-![briarthorn](docs/briarthorn.png)
+![briarthorn](assets/briarthorn.png)
 
 [![windows](https://github.com/funnansoftware/briarthorn/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/windows.yml)
 [![macos](https://github.com/funnansoftware/briarthorn/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/funnansoftware/briarthorn/actions/workflows/macos.yml)

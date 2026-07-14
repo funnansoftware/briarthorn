@@ -1,4 +1,7 @@
+# Layers, bottom-up: the game core (raylib-free simulation + state) and the raylib
+# graphics edge. Briarthorn (below) is the owning app object that drives them.
 add_subdirectory(game)
+add_subdirectory(raylib)
 
 if(ANDROID)
     # Android's NativeActivity loads the app as a shared library.
@@ -7,14 +10,19 @@ else()
     add_executable(briarthorn)
 endif()
 
+# The app: the Briarthorn owning object plus the entry point.
 target_sources(briarthorn
     PRIVATE
+        Briarthorn.cpp
         main.cpp
 )
 
+# Briarthorn depends only on the game core; main.cpp attaches the raylib graphics
+# surface, so the app links both.
 target_link_libraries(briarthorn
     PRIVATE
         briarthorn-game
+        briarthorn-raylib
 )
 
 # Windows: embed the application icon into the .exe via a resource script, so
