@@ -3,38 +3,27 @@
 #include <cmath>
 #include <numbers>
 
+#include <game/Heading.hpp>
+
 using bt::game::Geo;
 using bt::game::Vec2;
 
 namespace
 {
-    constexpr auto DegreesPerCircle = 360.0F;
-    constexpr auto StraightAngle = 180.0F;
-    constexpr auto RadiansPerDegree = std::numbers::pi_v<float> / StraightAngle;
+    constexpr auto RadiansPerDegree = std::numbers::pi_v<float> / 180.0F;
 }
 
-auto Geo::wrap360(float deg) -> float
+auto Geo::offsetX(Heading heading, float distance) -> float
 {
-    const auto wrapped = std::fmod(deg, DegreesPerCircle);
-    return wrapped < 0.0F ? wrapped + DegreesPerCircle : wrapped;
+    return std::sin(heading.degrees() * RadiansPerDegree) * distance;
 }
 
-auto Geo::wrap180(float deg) -> float
+auto Geo::offsetY(Heading heading, float distance) -> float
 {
-    return wrap360(deg + StraightAngle) - StraightAngle;
+    return -std::cos(heading.degrees() * RadiansPerDegree) * distance;
 }
 
-auto Geo::offsetX(float angle, float distance) -> float
+auto Geo::offset(Heading heading, float distance) -> Vec2
 {
-    return std::sin(angle * RadiansPerDegree) * distance;
-}
-
-auto Geo::offsetY(float angle, float distance) -> float
-{
-    return -std::cos(angle * RadiansPerDegree) * distance;
-}
-
-auto Geo::offset(float angle, float distance) -> Vec2
-{
-    return Vec2{.x = offsetX(angle, distance), .y = offsetY(angle, distance)};
+    return Vec2{.x = offsetX(heading, distance), .y = offsetY(heading, distance)};
 }

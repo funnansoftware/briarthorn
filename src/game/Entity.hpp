@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <game/Controls.hpp>
+#include <game/Heading.hpp>
 #include <game/Limits.hpp>
 #include <game/Vec2.hpp>
 
@@ -31,7 +32,7 @@ namespace bt::game
 
         // Kinematic state — the movement system writes these.
         Vec2 position{};
-        float heading{0.0F};      ///< degrees clockwise from north, [0, 360)
+        Heading heading{};        ///< clockwise from north; wraps by construction
         float speed{0.0F};        ///< m/s
         float acceleration{0.0F}; ///< m/s^2 applied last tick (output only)
         float speedBoost{1.0F};   ///< live top-speed multiplier movement derives

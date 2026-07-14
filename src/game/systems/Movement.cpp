@@ -41,9 +41,10 @@ auto Movement::advance(Entity& entity, float dt) -> void
     entity.acceleration = dt > 0.0F ? (newSpeed - entity.speed) / dt : 0.0F;
     entity.speed = newSpeed;
 
-    // Heading: steer (-1..1) is a fraction of the turn-rate limit.
+    // Heading: steer (-1..1) is a fraction of the turn-rate limit; Heading
+    // keeps itself wrapped.
     const auto steer = std::clamp(entity.controls.steer, -1.0F, 1.0F);
-    entity.heading = Geo::wrap360(entity.heading + (steer * entity.limits.turnRate * dt));
+    entity.heading += steer * entity.limits.turnRate * dt;
 
     // Position: integrate along the new heading on the Geo convention.
     entity.position = entity.position + Geo::offset(entity.heading, entity.speed * dt);

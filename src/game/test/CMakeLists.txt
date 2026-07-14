@@ -2,7 +2,13 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(briarthorn-test
     Clock.test.cpp
-    Sim.test.cpp
+    CommandBuffer.test.cpp
+    Duration.test.cpp
+    Entity.test.cpp
+    Geo.test.cpp
+    Heading.test.cpp
+    Movement.test.cpp
+    World.test.cpp
 )
 
 target_link_libraries(briarthorn-test
