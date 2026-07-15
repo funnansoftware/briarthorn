@@ -1,6 +1,14 @@
-# Layers, bottom-up: the game core (raylib-free simulation + state) and the raylib
-# graphics edge. Briarthorn (below) is the owning app object that drives them.
+# Layers, bottom-up: the game core (renderer-free simulation + state), then one
+# graphics edge. The qt manifest feature — set by the desktop CMake presets —
+# selects the Qt Quick renderer; without it (the zig build, android, emscripten)
+# the raylib edge below renders as before.
 add_subdirectory(game)
+
+if("qt" IN_LIST VCPKG_MANIFEST_FEATURES)
+    add_subdirectory(quick) # defines the briarthorn executable around Qt Quick
+    return()
+endif()
+
 add_subdirectory(raylib)
 
 if(ANDROID)

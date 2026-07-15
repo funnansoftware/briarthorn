@@ -11,7 +11,8 @@
             },
             "cacheVariables": {
                 "VCPKG_HOST_TRIPLET": "arm64-osx",
-                "VCPKG_TARGET_TRIPLET": "arm64-osx"
+                "VCPKG_TARGET_TRIPLET": "arm64-osx",
+                "VCPKG_MANIFEST_FEATURES": "qt"
             }
         }
     ]

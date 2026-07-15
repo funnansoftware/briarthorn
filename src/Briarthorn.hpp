@@ -2,17 +2,14 @@
 
 #include <chrono>
 #include <memory>
-#include <optional>
-#include <string>
 #include <vector>
 
 #include <game/Clock.hpp>
 #include <game/CommandBuffer.hpp>
 #include <game/Duration.hpp>
+#include <game/Graphics.hpp>
 #include <game/System.hpp>
 #include <game/World.hpp>
-
-#include <raylib/Renderer.hpp>
 
 namespace bt
 {
@@ -23,12 +20,13 @@ namespace bt
     /// systems, the fixed-timestep clock and the command buffer.
     ///
     /// It runs headless — the simulation steps with no graphics at all, which is how
-    /// tests and any future server drive it — or drives an interactive loop once
-    /// graphics are enabled.
+    /// tests and any future server drive it — or drives an interactive loop once a
+    /// graphics surface is attached. The surface is the abstract game::Graphics, so
+    /// this object depends on no concrete renderer; main wires one in.
     ///
     /// @code
     /// bt::Briarthorn briarthorn;
-    /// briarthorn.initGraphics();   // opens the window; omit to stay headless
+    /// briarthorn.setGraphics(std::make_unique<bt::raylib::Renderer>()); // omit to stay headless
     /// briarthorn.run();
     /// @endcode
     class Briarthorn
@@ -43,15 +41,21 @@ namespace bt
         /// @param step The fixed simulation step interval to set.
         auto setStepInterval(game::Duration step) -> void;
 
-        /// @brief Enable graphics: open a @p width x @p height window titled @p title
-        /// and hold the raylib surface.
+        /// @brief Attach the presentation-and-input surface run() drives.
         ///
-        /// Until this is called the app is headless. Calling it again re-opens the
-        /// window.
-        /// @param title The window title.
-        /// @param width The window width in pixels.
-        /// @param height The window height in pixels.
-        auto initGraphics(std::string title = "briarthorn", int width = raylib::DefaultWindowWidth, int height = raylib::DefaultWindowHeight) -> void;
+        /// Until this is called the app is headless. Pass the concrete renderer
+        /// (e.g. bt::raylib::Renderer); replacing an existing surface drops the
+        /// old one first.
+        /// @param graphics The surface to attach, or nullptr to go headless.
+        auto setGraphics(std::unique_ptr<game::Graphics> graphics) -> void;
+
+        /// @brief Restart the fixed-step clock's real-time accounting now.
+        ///
+        /// Call after slow start-up work (opening a window, loading assets) so the
+        /// elapsed time isn't folded into the first update() as a catch-up burst.
+        /// run() does this itself; frame loops owned by a framework (e.g. Qt)
+        /// call it once before their first frame.
+        auto resetClock() -> void;
 
         /// @brief Accumulate the real time elapsed (via the chrono clock) since the
         /// last call and run every fixed step now due: for each, flush the command
@@ -64,7 +68,7 @@ namespace bt
 
         /// @brief Drive the loop until stopped: each iteration advances the
         /// simulation by the fixed updates now due (update(), on its own clock) and —
-        /// when graphics are enabled — polls input before and renders after.
+        /// when graphics are attached — polls input before and renders after.
         ///
         /// Runs headless too, with no window and no render. Ends when the window
         /// closes or stop() is called, and is safe to call again afterwards.
@@ -87,7 +91,7 @@ namespace bt
         game::CommandBuffer commands_;
         std::vector<std::unique_ptr<game::System>> systems_;
         game::Clock clock_;
-        std::optional<raylib::Renderer> graphics_;
+        std::unique_ptr<game::Graphics> graphics_;
         bool running_{false};
     };
 }

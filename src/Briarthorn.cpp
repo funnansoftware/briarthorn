@@ -7,7 +7,6 @@
 #include <game/Entity.hpp>
 #include <game/Vec2.hpp>
 #include <game/systems/Movement.hpp>
-#include <raylib/Renderer.hpp>
 
 using bt::Briarthorn;
 
@@ -32,9 +31,14 @@ auto Briarthorn::setStepInterval(game::Duration step) -> void
     clock_.setInterval(step);
 }
 
-auto Briarthorn::initGraphics(std::string title, int width, int height) -> void
+auto Briarthorn::setGraphics(std::unique_ptr<game::Graphics> graphics) -> void
 {
-    graphics_.emplace(raylib::Renderer::Config{.title = std::move(title), .width = width, .height = height});
+    graphics_ = std::move(graphics);
+}
+
+auto Briarthorn::resetClock() -> void
+{
+    clock_.reset();
 }
 
 auto Briarthorn::buildWorld() -> void
@@ -90,7 +94,7 @@ auto Briarthorn::run() -> void
 {
     // Start real-time stepping now — after any window has opened — so slow start-up
     // work isn't folded into the first frame as a catch-up burst.
-    clock_.reset();
+    resetClock();
     running_ = true;
 
     while (running_)
