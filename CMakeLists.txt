@@ -20,6 +20,7 @@ if(ENABLE_COVERAGE)
     add_link_options(-fprofile-instr-generate)
 endif()
 
+include(cmake/qt-vcpkg-fixup.cmake)
 include(cmake/target/apk.cmake)
 include(cmake/target/clang-format.cmake)
 include(cmake/target/clang-tidy.cmake)
